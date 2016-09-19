@@ -6,30 +6,39 @@
 
 ObjectAllocator::ObjectAllocator(size_t ObjectSize, const OAConfig& config) throw(OAException) :
 oac(config) {
-  std::cout <<ObjectSize << std::endl;
+
   oas.ObjectSize_ = ObjectSize;
   oas.PagesInUse_ = 0;
   if (oac.Alignment_ != 0){
-    oac.InterAlignSize_ = countInterAlign(ObjectSize,true);
-    oac.LeftAlignSize_ = countInterAlign(sizeof(GenericObject), false);
+    oac.InterAlignSize_ = countAlign(ObjectSize,true);
+    oac.LeftAlignSize_ = countAlign(sizeof(GenericObject), false);
   }
-
-  oas.PageSize_ =  (oac.ObjectsPerPage_ - 1) * oac.InterAlignSize_ +
-              (oac.ObjectsPerPage_ - 1) * oac.HBlockInfo_.size_ +
-              (oac.ObjectsPerPage_ - 1) * 2 * oac.PadBytes_ +
-              oac.ObjectsPerPage_ * ObjectSize +
-              oac.PadBytes_;
+//std::cout << oac.PadBytes_ << " " << ObjectSize << " " << oac.HBlockInfo_.size_ << " " << oac.InterAlignSize_ << std::endl;
 
   perObj = ObjectSize + 2 * oac.PadBytes_ + oac.HBlockInfo_.size_ + oac.InterAlignSize_;
-  headSize = sizeof(GenericObject) + oac.PadBytes_ + oac.HBlockInfo_.size_ + oac.LeftAlignSize_;
 
+  oas.PageSize_ = ObjectSize + oac.PadBytes_+
+                  (oac.ObjectsPerPage_ - 1) * perObj;
+  headSize = sizeof(GenericObject) + oac.PadBytes_ + oac.HBlockInfo_.size_ + oac.LeftAlignSize_;
+//  std::cout << perObj << " " << headSize << std::endl;
   oas.PageSize_ += headSize;
+
   MakePage();
 
 }
 
 ObjectAllocator::~ObjectAllocator() throw(){
   while(PageListHead){
+    if (oac.HBlockInfo_.type_ ==  OAConfig::hbExternal){
+      while(FreeListHead){
+        delete reinterpret_cast<MemBlockInfo*>(
+                reinterpret_cast<char*>(FreeListHead) + sizeof(GenericObject) +
+                                        oas.ObjectSize_ +
+                                        oac.InterAlignSize_+ oac.PadBytes_
+               );
+        FreeListHead = FreeListHead->Next;
+      }
+    }
     char * tmp = reinterpret_cast<char*>(PageListHead);
     PageListHead = PageListHead->Next;
     delete[] tmp;
@@ -70,15 +79,19 @@ void * ObjectAllocator::Allocate(const char *label) throw(OAException){
       --oas.FreeObjects_;
     }
 
-  memset(tmp, ALLOCATED_PATTERN, oas.ObjectSize_);
+  memset(reinterpret_cast<char*>(tmp), ALLOCATED_PATTERN, perObj);
   SetHeaderInfo(reinterpret_cast<char*>(tmp) + oas.ObjectSize_ + oac.PadBytes_ + oac.InterAlignSize_,
                 label);
   return reinterpret_cast<void*>(tmp);
 }
 
-unsigned ObjectAllocator::countInterAlign(size_t size_, bool interAlignment){
-  return size_ + ((interAlignment)?2:1) * oac.PadBytes_ + oac.HBlockInfo_.size_ +
-          (static_cast<unsigned>(size_) % oac.Alignment_);
+unsigned ObjectAllocator::countAlign(size_t size_, bool interAlignment){
+
+  size_t tmpSize = size_ + ((interAlignment)?2:1) * oac.PadBytes_ + oac.HBlockInfo_.size_;
+  size_t tmpAlignSize = tmpSize;
+  while(tmpAlignSize % oac.Alignment_) ++tmpAlignSize;
+  return (tmpAlignSize - tmpSize);
+
 }
 
 void ObjectAllocator::MakePage(){
@@ -110,7 +123,7 @@ void ObjectAllocator::MakePage(){
     FreeListHead = reinterpret_cast<GenericObject*>(tmphead + headSize);
     FreeListHead->Next = 0;
 
-    for (size_t i = 0; i < oac.ObjectsPerPage_ - 1 ; ++i){
+    for (size_t i = 0; i < oac.ObjectsPerPage_-1 ; ++i){
       GenericObject * tmpFree = FreeListHead;
       GenericObject * tmpNextFree = FreeListHead->Next;
 
@@ -123,7 +136,7 @@ void ObjectAllocator::MakePage(){
       if (i != oac.ObjectsPerPage_ - 2)
         SetBlockMem(reinterpret_cast<char*>(FreeListHead) + sizeof(GenericObject));
       else
-        memset(reinterpret_cast<char*>(FreeListHead) + perObj + sizeof(GenericObject),
+        memset(reinterpret_cast<char*>(FreeListHead) + oas.ObjectSize_,
               PAD_PATTERN,
               oac.PadBytes_);
     }
@@ -135,22 +148,23 @@ void ObjectAllocator::MakePage(){
 void ObjectAllocator::SetHeadMem(){
   char * tmp = reinterpret_cast<char*>(PageListHead) + sizeof(GenericObject);
   memset( tmp, ALIGN_PATTERN , oac.LeftAlignSize_);
+  // set header here
   memset( tmp + oac.LeftAlignSize_ + oac.HBlockInfo_.size_, PAD_PATTERN , oac.PadBytes_);
 }
 
 void ObjectAllocator::SetBlockMem(char * tmp){
+  size_t tmpObjsize = oas.ObjectSize_ - sizeof(GenericObject);
   memset(tmp, UNALLOCATED_PATTERN, oas.ObjectSize_);
-  memset(tmp + oas.ObjectSize_, PAD_PATTERN , oac.PadBytes_);
-  memset(tmp + oas.ObjectSize_ + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
-  memset(tmp + oas.ObjectSize_ + oac.PadBytes_ + oac.InterAlignSize_ + oac.HBlockInfo_.size_,
+  memset(tmp + tmpObjsize, PAD_PATTERN , oac.PadBytes_);
+  memset(tmp + tmpObjsize + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
+  memset(tmp + tmpObjsize + oac.PadBytes_ + oac.InterAlignSize_ + oac.HBlockInfo_.size_,
         PAD_PATTERN , oac.PadBytes_);
 
 }
 
 void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
 
-
-  if (oac.HBlockInfo_.type_ != OAConfig::hbNone){
+  if (oac.HBlockInfo_.type_ != OAConfig::hbBasic){
     unsigned * allocNum = reinterpret_cast<unsigned*>(tmp);
     bool * inUse = reinterpret_cast<bool*>(tmp + sizeof(unsigned));
     *allocNum = oas.Allocations_;
@@ -179,13 +193,78 @@ void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
     }catch (std::bad_alloc &){
 
     }
+
   }
 
 }
 
-void ObjectAllocator::Free(void *Object) throw(OAException){}
+void ObjectAllocator::Free(void *Object) throw(OAException){
+
+  char * tmp = reinterpret_cast<char*>(Object);
+  bool freed = true;
+  bool corrupted = false;
+
+  if (!oac.UseCPPMemManager_){
+
+      for (int i = 0; i < oac.PadBytes_; ++i){
+        if ( *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN)
+          corrupted = true;
+      }
+
+      for (int i = 0; i < oac.PadBytes_; ++i){
+        if ( *(tmp + oas.ObjectSize_ + oac.PadBytes_ +
+                oac.Alignment_ + oac.HBlockInfo_.size_ + i) != PAD_PATTERN)
+          corrupted = true;
+      }
+
+      if (corrupted)
+        throw OAException(OAException::E_CORRUPTED_BLOCK, "corrupted");
+      //?
+      for (int i = 0; i < oas.ObjectSize_- sizeof(GenericObject); ++i){
+        if ( *(tmp + sizeof(GenericObject) + i) != FREED_PATTERN)
+          freed = false;
+      }
+
+      if (freed){
+
+        if (oac.HBlockInfo_.type_ != OAConfig::hbBasic){
+          bool * inUse = reinterpret_cast<bool*>(tmp + oas.ObjectSize_ +sizeof(unsigned));
+          *inUse = false;
+        }
+
+        if (oac.HBlockInfo_.type_ == OAConfig::hbExtended){
+          bool * inUse = reinterpret_cast<bool*>(tmp + oas.ObjectSize_ + sizeof(unsigned short) + sizeof(unsigned));
+          *inUse = false;
+        }
+
+        if (oac.HBlockInfo_.type_ == OAConfig::hbExternal){
+          MemBlockInfo * tmpBlock = reinterpret_cast<MemBlockInfo*>(tmp + oas.ObjectSize_);
+          tmpBlock->in_use = false;
+        }
+
+      }else
+      throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
+
+      --oas.ObjectsInUse_;
+      ++oas.Deallocations_;
+      ++oas.FreeObjects_;
+
+
+  }else{
+    delete [] tmp;
+
+    --oas.ObjectsInUse_;
+    ++oas.Deallocations_;
+    ++oas.FreeObjects_;
+  }
+}
+
+unsigned ObjectAllocator::ValidatePages(VALIDATECALLBACK fn) const{
+  return 0;
+}
+
 unsigned ObjectAllocator::DumpMemoryInUse(DUMPCALLBACK fn) const{return 0;}
-unsigned ObjectAllocator::ValidatePages(VALIDATECALLBACK fn) const{return 0;}
+
 unsigned ObjectAllocator::FreeEmptyPages(void){return 0;}
 bool ObjectAllocator::ImplementedExtraCredit(void){return false;}
 

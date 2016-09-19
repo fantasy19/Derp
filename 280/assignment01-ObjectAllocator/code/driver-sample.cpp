@@ -2130,7 +2130,7 @@ int main(int argc, char **argv)
       DoStudents(0, true);
       cout << endl;
       break;
-    
+
     default:
       cout << "============================== Students..." << endl;
       DoStudents(0, false);

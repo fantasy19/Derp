@@ -183,7 +183,7 @@ class ObjectAllocator
     ObjectAllocator &operator=(const ObjectAllocator &oa);
 
       // Other private fields and methods...
-      unsigned countInterAlign(size_t size_, bool interAlignment);
+      unsigned countAlign(size_t size_, bool interAlignment);
       void MakePage();
       void SetHeadMem();
       void SetBlockMem(char * tmp);
