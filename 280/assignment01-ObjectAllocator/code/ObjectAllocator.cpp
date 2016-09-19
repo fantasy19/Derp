@@ -104,8 +104,10 @@ void ObjectAllocator::MakePage(){
   }
 
   if (tmphead){
+    
     ++oas.PagesInUse_;
     memset (tmphead,0,oas.PageSize_);
+    
     if (oas.PagesInUse_ == 1){
       PageListHead = reinterpret_cast<GenericObject*>(tmphead);
       PageListHead->Next = 0;
@@ -117,8 +119,9 @@ void ObjectAllocator::MakePage(){
       PageListHead->Next = tmp;
       PageListHead->Next->Next = tmpNext;
     }
-
-    SetHeadMem();
+    
+    if (oac.DebugOn_)
+      SetHeadMem();
 
     FreeListHead = reinterpret_cast<GenericObject*>(tmphead + headSize);
     FreeListHead->Next = 0;
@@ -133,12 +136,14 @@ void ObjectAllocator::MakePage(){
       FreeListHead->Next = tmpFree;
       FreeListHead->Next->Next = tmpNextFree;
 
-      if (i != oac.ObjectsPerPage_ - 2)
-        SetBlockMem(reinterpret_cast<char*>(FreeListHead) + sizeof(GenericObject));
-      else
-        memset(reinterpret_cast<char*>(FreeListHead) + oas.ObjectSize_,
-              PAD_PATTERN,
-              oac.PadBytes_);
+      if (i != oac.ObjectsPerPage_ - 2){
+        if (oac.DebugOn_)
+          SetBlockMem(reinterpret_cast<char*>(FreeListHead) + sizeof(GenericObject));
+      }else
+        if (oac.DebugOn_)
+          memset(reinterpret_cast<char*>(FreeListHead) + oas.ObjectSize_,
+                PAD_PATTERN,
+                oac.PadBytes_);
     }
 
     oas.FreeObjects_ = oac.ObjectsPerPage_;
@@ -154,7 +159,7 @@ void ObjectAllocator::SetHeadMem(){
 
 void ObjectAllocator::SetBlockMem(char * tmp){
   size_t tmpObjsize = oas.ObjectSize_ - sizeof(GenericObject);
-  memset(tmp, UNALLOCATED_PATTERN, oas.ObjectSize_);
+  memset(tmp, UNALLOCATED_PATTERN, tmpObjsize);
   memset(tmp + tmpObjsize, PAD_PATTERN , oac.PadBytes_);
   memset(tmp + tmpObjsize + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
   memset(tmp + tmpObjsize + oac.PadBytes_ + oac.InterAlignSize_ + oac.HBlockInfo_.size_,
@@ -206,45 +211,46 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 
   if (!oac.UseCPPMemManager_){
 
-      for (int i = 0; i < oac.PadBytes_; ++i){
-        if ( *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN)
+      for (int i = 0; i < oac.PadBytes_; ++i){ // front pad check
+        if ( *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN && 
+              *(tmp + oas.ObjectSize_ + oac.PadBytes_ +
+              oac.Alignment_ + oac.HBlockInfo_.size_ + i) != PAD_PATTERN)
           corrupted = true;
       }
 
-      for (int i = 0; i < oac.PadBytes_; ++i){
-        if ( *(tmp + oas.ObjectSize_ + oac.PadBytes_ +
-                oac.Alignment_ + oac.HBlockInfo_.size_ + i) != PAD_PATTERN)
-          corrupted = true;
-      }
-
+//std::cout << "0" << std::endl;
       if (corrupted)
         throw OAException(OAException::E_CORRUPTED_BLOCK, "corrupted");
-      //?
+
       for (int i = 0; i < oas.ObjectSize_- sizeof(GenericObject); ++i){
         if ( *(tmp + sizeof(GenericObject) + i) != FREED_PATTERN)
           freed = false;
       }
 
       if (freed){
-
+        
+        char * headerFront = tmp + oas.ObjectSize_ + oac.PadBytes_ + oac.Alignment_;
+        
         if (oac.HBlockInfo_.type_ != OAConfig::hbBasic){
-          bool * inUse = reinterpret_cast<bool*>(tmp + oas.ObjectSize_ +sizeof(unsigned));
+          bool * inUse = reinterpret_cast<bool*>(headerFront + sizeof(unsigned));
           *inUse = false;
         }
 
         if (oac.HBlockInfo_.type_ == OAConfig::hbExtended){
-          bool * inUse = reinterpret_cast<bool*>(tmp + oas.ObjectSize_ + sizeof(unsigned short) + sizeof(unsigned));
+          bool * inUse = reinterpret_cast<bool*>(headerFront + sizeof(unsigned short) + sizeof(unsigned));
           *inUse = false;
         }
 
         if (oac.HBlockInfo_.type_ == OAConfig::hbExternal){
-          MemBlockInfo * tmpBlock = reinterpret_cast<MemBlockInfo*>(tmp + oas.ObjectSize_);
+          MemBlockInfo * tmpBlock = reinterpret_cast<MemBlockInfo*>(headerFront);
           tmpBlock->in_use = false;
         }
-
+         
       }else
-      throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
-
+        throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
+      
+      
+      memset(tmp + sizeof(GenericObject), FREED_PATTERN, oas.ObjectSize_- sizeof(GenericObject));
       --oas.ObjectsInUse_;
       ++oas.Deallocations_;
       ++oas.FreeObjects_;
