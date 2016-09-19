@@ -959,6 +959,7 @@ void DoStudents(unsigned padding, bool printall)
 
     OAConfig config(newdel, 4, 2, debug, padbytes, header, alignment);
     studentObjectMgr = new ObjectAllocator(sizeof(Student), config);
+	
   }
   catch (const OAException& e)
   {
@@ -982,7 +983,7 @@ void DoStudents(unsigned padding, bool printall)
   try
   {
     pStudent1 = static_cast<Student *>( studentObjectMgr->Allocate() );
-    PrintCounts(studentObjectMgr);
+    PrintCounts(studentObjectMgr);   
     if (printall)
       DumpPages(studentObjectMgr, wrap);
     pStudent2 = static_cast<Student *>( studentObjectMgr->Allocate() );
@@ -993,6 +994,7 @@ void DoStudents(unsigned padding, bool printall)
     PrintCounts(studentObjectMgr);
     if (printall)
       DumpPages(studentObjectMgr, wrap);
+  
   }
   catch (const OAException& e)
   {
@@ -2130,7 +2132,16 @@ int main(int argc, char **argv)
       DoStudents(0, true);
       cout << endl;
       break;
-
+	case 3:
+      cout << "============================== Employees..." << endl;
+      DoEmployees();
+      cout << endl;
+      break;
+case 4:
+cout << "============================== Test padding..." << endl;
+TestPadding(6);
+cout << endl;
+break;
     default:
       cout << "============================== Students..." << endl;
       DoStudents(0, false);

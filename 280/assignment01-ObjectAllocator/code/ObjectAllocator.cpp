@@ -5,7 +5,7 @@
 
 
 ObjectAllocator::ObjectAllocator(size_t ObjectSize, const OAConfig& config) throw(OAException) :
-oac(config), PageListHead(nullptr), FreeListHead(nullptr) {
+oac(config), PageListHead(0), FreeListHead(0) {
 
   oas.ObjectSize_ = ObjectSize;
   oas.PagesInUse_ = 0;
@@ -22,7 +22,6 @@ oac(config), PageListHead(nullptr), FreeListHead(nullptr) {
   headSize = sizeof(GenericObject) + oac.PadBytes_ + oac.HBlockInfo_.size_ + oac.LeftAlignSize_;
 //  std::cout << perObj << " " << headSize << std::endl;
   oas.PageSize_ += headSize;
-
   MakePage();
 
 }
@@ -48,17 +47,35 @@ ObjectAllocator::~ObjectAllocator() throw(){
 
 void * ObjectAllocator::Allocate(const char *label) throw(OAException){
 
-  GenericObject * tmp = FreeListHead;
+  //GenericObject * tmp = FreeListHead;
+  GenericObject * tmp = nullptr;
 
   if (oac.UseCPPMemManager_){
-    char * charTmp = reinterpret_cast<char*>(tmp);
-    charTmp = new char[oas.ObjectSize_];
+    //char * charTmp = reinterpret_cast<char*>(tmp);
+    return new char[oas.ObjectSize_];
   }
 
-  if (!tmp && !oac.UseCPPMemManager_){
+  if(!FreeListHead) MakePage();
+  
+  tmp = FreeListHead;
+  FreeListHead = FreeListHead->Next;
+  
+  ++oas.ObjectsInUse_;
+  ++oas.Allocations_;
+  --oas.FreeObjects_;
+
+  if (oas.ObjectsInUse_ > oas.MostObjects_)
+		  oas.MostObjects_ = oas.ObjectsInUse_;
+	  
+  memset(reinterpret_cast<char*>(tmp), ALLOCATED_PATTERN, perObj);
+  
+  return tmp;
+/*  if (!tmp && !oac.UseCPPMemManager_){
+	  
     if (oas.PagesInUse_ != oac.MaxPages_){ // limit of pages not hit yet
       MakePage();
       tmp = FreeListHead; // FreeListHead not nullptr by now
+
       FreeListHead = FreeListHead->Next;
 
       ++oas.ObjectsInUse_;
@@ -82,7 +99,7 @@ void * ObjectAllocator::Allocate(const char *label) throw(OAException){
   memset(reinterpret_cast<char*>(tmp), ALLOCATED_PATTERN, perObj);
   SetHeaderInfo(reinterpret_cast<char*>(tmp) + oas.ObjectSize_ + oac.PadBytes_ + oac.InterAlignSize_,
                 label);
-  return reinterpret_cast<void*>(tmp);
+  return reinterpret_cast<void*>(tmp);*/
 }
 
 unsigned ObjectAllocator::countAlign(size_t size_, bool interAlignment){
@@ -94,20 +111,24 @@ unsigned ObjectAllocator::countAlign(size_t size_, bool interAlignment){
 
 }
 
-void ObjectAllocator::MakePage(){
-  char * tmphead;
+void ObjectAllocator::MakePage() throw(OAException) {
+  char * tmphead = nullptr;
+  if (oas.PagesInUse_ >= oac.MaxPages_)
+	  throw OAException(OAException::E_NO_PAGES," no more pages");
+  
   try{
     tmphead = new char[oas.PageSize_];
   }
   catch(std::bad_alloc){
     throw OAException(OAException::E_NO_MEMORY," Insufficient Memory");
   }
+  
 
   if (tmphead){
     
     ++oas.PagesInUse_;
     memset (tmphead,UNALLOCATED_PATTERN,oas.PageSize_);
-    
+    /*
     if (oas.PagesInUse_ == 1){
       PageListHead = reinterpret_cast<GenericObject*>(tmphead);
       PageListHead->Next = 0;
@@ -119,17 +140,28 @@ void ObjectAllocator::MakePage(){
       PageListHead->Next = tmp;
       PageListHead->Next->Next = tmpNext;
     }
-    
-    if (oac.DebugOn_)
-      SetHeadMem();
-	tmphead += headSize;
+	*/
 	
-	GenericObject * prev = nullptr;
-    for (size_t i = 0; i < oac.ObjectsPerPage_-1 ; ++i){
-		GenericObject * currBlock = reinterpret_cast<GenericObject*>(tmphead);
-		currBlock->Next = prev;
-		tmphead += oas.ObjectSize_;
+	reinterpret_cast<GenericObject*>(tmphead)->Next = PageListHead;
+	PageListHead = reinterpret_cast<GenericObject*>(tmphead);
+    
+    /*if (oac.DebugOn_)
+      SetHeadMem();*/
+  
+	//tmphead += headSize;
+	tmphead += sizeof(void*);
+	
+	memset(tmphead, ALIGN_PATTERN , oac.LeftAlignSize_);
+	tmphead += oac.LeftAlignSize_;
+	
+	GenericObject * prev = 0;
+    for (size_t i = 0; i < oac.ObjectsPerPage_; ++i){
+		reinterpret_cast<GenericObject*>(tmphead)->Next = prev;
+		/*FreeListHead = reinterpret_cast<GenericObject*>(tmphead);
+		FreeListHead->Next = prev;*/
 		prev = reinterpret_cast<GenericObject*>(tmphead);
+		tmphead += perObj;//oas.ObjectSize_;
+		
 		
       /*
 	  GenericObject * tmpFree = FreeListHead;
@@ -149,17 +181,19 @@ void ObjectAllocator::MakePage(){
           memset(reinterpret_cast<char*>(FreeListHead) + oas.ObjectSize_,
                 PAD_PATTERN,
                 oac.PadBytes_);*/
-    }
-
-    oas.FreeObjects_ = oac.ObjectsPerPage_;
+    
+	}
+	FreeListHead = prev;
+    oas.FreeObjects_ += oac.ObjectsPerPage_;
 }
 }
 
 void ObjectAllocator::SetHeadMem(){
-  char * tmp = reinterpret_cast<char*>(PageListHead) + sizeof(GenericObject);
+  //char * tmp = reinterpret_cast<char*>(PageListHead) + sizeof(GenericObject);
+  char * tmp = reinterpret_cast<char*>(PageListHead) + sizeof(void*);
   memset( tmp, ALIGN_PATTERN , oac.LeftAlignSize_);
   // set header here
-  memset( tmp + oac.LeftAlignSize_ + oac.HBlockInfo_.size_, PAD_PATTERN , oac.PadBytes_);
+  //memset( tmp + oac.LeftAlignSize_ + oac.HBlockInfo_.size_, PAD_PATTERN , oac.PadBytes_);
 }
 
 void ObjectAllocator::SetBlockMem(char * tmp){
@@ -216,8 +250,8 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 
   if (!oac.UseCPPMemManager_){
 
-      for (int i = 0; i < oac.PadBytes_; ++i){ // front pad check
-        if ( *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN && 
+      for (int i = 0; i < oac.PadBytes_; ++i){ 
+        if ( *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN ||
               *(tmp + oas.ObjectSize_ + oac.PadBytes_ +
               oac.Alignment_ + oac.HBlockInfo_.size_ + i) != PAD_PATTERN)
           corrupted = true;
@@ -226,7 +260,42 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 //std::cout << "0" << std::endl;
       if (corrupted)
         throw OAException(OAException::E_CORRUPTED_BLOCK, "corrupted");
+	  
+	  if(static_cast<unsigned char>(*(tmp + sizeof(void*))) == FREED_PATTERN)
+		  throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
+	  
+	  GenericObject* tmpPage = PageListHead;
+	  while (tmpPage){
+		  if (tmp > reinterpret_cast<char*>(tmpPage) &&
+		  tmp < reinterpret_cast<char*>(tmpPage) + oas.PageSize_){
+			  char * blockStart = reinterpret_cast<char*>(tmpPage) + sizeof(void*) ;
 
+			  if ((tmp - blockStart) % oas.ObjectSize_)
+				 throw OAException(OAException::E_BAD_BOUNDARY, "bad Boundary"); 
+		  }
+		  
+		  if (tmpPage->Next == 0 && reinterpret_cast<char*>(tmpPage) + oas.PageSize_ == tmp)
+			  throw OAException(OAException::E_BAD_BOUNDARY, "bad Boundary"); 
+		  tmpPage = tmpPage->Next;
+	  }
+
+		  
+	  /*
+	  for (int i = 0; i < oas.ObjectSize_; ++i){
+        if ( *(tmp + i) != FREED_PATTERN)
+          freed = false;
+	  
+      }
+	  
+	  if (freed)
+		  throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
+	  */
+	   memset(tmp , FREED_PATTERN, oas.ObjectSize_);
+	   
+	   reinterpret_cast<GenericObject*>(tmp)->Next = FreeListHead;
+	   FreeListHead = reinterpret_cast<GenericObject*>(tmp);
+	  
+	  /*
       for (int i = 0; i < oas.ObjectSize_- sizeof(GenericObject); ++i){
         if ( *(tmp + sizeof(GenericObject) + i) != FREED_PATTERN)
           freed = false;
@@ -259,15 +328,15 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
       --oas.ObjectsInUse_;
       ++oas.Deallocations_;
       ++oas.FreeObjects_;
-
+*/
 
   }else{
     delete [] tmp;
 
+  }
     --oas.ObjectsInUse_;
     ++oas.Deallocations_;
     ++oas.FreeObjects_;
-  }
 }
 
 unsigned ObjectAllocator::ValidatePages(VALIDATECALLBACK fn) const{
