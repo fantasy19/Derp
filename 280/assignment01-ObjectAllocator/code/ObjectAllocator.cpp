@@ -5,7 +5,7 @@
 
 
 ObjectAllocator::ObjectAllocator(size_t ObjectSize, const OAConfig& config) throw(OAException) :
-oac(config) {
+oac(config), PageListHead(nullptr), FreeListHead(nullptr) {
 
   oas.ObjectSize_ = ObjectSize;
   oas.PagesInUse_ = 0;
@@ -106,7 +106,7 @@ void ObjectAllocator::MakePage(){
   if (tmphead){
     
     ++oas.PagesInUse_;
-    memset (tmphead,0,oas.PageSize_);
+    memset (tmphead,UNALLOCATED_PATTERN,oas.PageSize_);
     
     if (oas.PagesInUse_ == 1){
       PageListHead = reinterpret_cast<GenericObject*>(tmphead);
@@ -122,12 +122,17 @@ void ObjectAllocator::MakePage(){
     
     if (oac.DebugOn_)
       SetHeadMem();
-
-    FreeListHead = reinterpret_cast<GenericObject*>(tmphead + headSize);
-    FreeListHead->Next = 0;
-
+	tmphead += headSize;
+	
+	GenericObject * prev = nullptr;
     for (size_t i = 0; i < oac.ObjectsPerPage_-1 ; ++i){
-      GenericObject * tmpFree = FreeListHead;
+		GenericObject * currBlock = reinterpret_cast<GenericObject*>(tmphead);
+		currBlock->Next = prev;
+		tmphead += oas.ObjectSize_;
+		prev = reinterpret_cast<GenericObject*>(tmphead);
+		
+      /*
+	  GenericObject * tmpFree = FreeListHead;
       GenericObject * tmpNextFree = FreeListHead->Next;
 
       FreeListHead = reinterpret_cast<GenericObject*>(
@@ -143,7 +148,7 @@ void ObjectAllocator::MakePage(){
         if (oac.DebugOn_)
           memset(reinterpret_cast<char*>(FreeListHead) + oas.ObjectSize_,
                 PAD_PATTERN,
-                oac.PadBytes_);
+                oac.PadBytes_);*/
     }
 
     oas.FreeObjects_ = oac.ObjectsPerPage_;
