@@ -2137,11 +2137,31 @@ int main(int argc, char **argv)
       DoEmployees();
       cout << endl;
       break;
-case 4:
-cout << "============================== Test padding..." << endl;
-TestPadding(6);
-cout << endl;
-break;
+	case 4:
+		cout << "============================== Test padding..." << endl;
+		TestPadding(6);
+		cout << endl;
+		break;
+	case 5:
+		cout << "============================== Test padding..." << endl;
+		TestPadding(10);
+		cout << endl;
+		break;
+	case 6:
+		cout << "============================== Test basic header blocks..." << endl;
+		TestBasicHeaderBlocks();
+		cout << endl;
+		break;
+	case 7:
+		cout << "============================== Test extended header blocks(1)..." << endl;
+		TestExtendedHeaderBlocks(1);
+		cout << endl;
+	break;
+	case 8:
+		cout << "============================== Test external header blocks..." << endl;
+		TestExternalHeaderBlocks();
+		cout << endl;
+	break;
     default:
       cout << "============================== Students..." << endl;
       DoStudents(0, false);
