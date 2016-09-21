@@ -185,7 +185,6 @@ class ObjectAllocator
       // Other private fields and methods...
       unsigned countAlign(size_t size_, bool interAlignment);
       void MakePage(const char * label = 0) throw(OAException);
-      void SetHeadMem();
       void SetBlockMem(char * tmp);
       void SetHeaderInfo(char * tmp, const char * label);
       OAConfig oac;

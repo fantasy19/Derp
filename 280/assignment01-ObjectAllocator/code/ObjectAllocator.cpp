@@ -57,6 +57,13 @@ void * ObjectAllocator::Allocate(const char *label) throw(OAException) {
 
 	if (oac.UseCPPMemManager_) {
 		//char * charTmp = reinterpret_cast<char*>(tmp);
+		++oas.ObjectsInUse_;
+		++oas.Allocations_;
+		--oas.FreeObjects_;
+
+		if (oas.ObjectsInUse_ > oas.MostObjects_)
+			oas.MostObjects_ = oas.ObjectsInUse_;
+
 		return new char[oas.ObjectSize_];
 	}
 
@@ -181,7 +188,7 @@ void ObjectAllocator::SetBlockMem(char * tmp){
 
 void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
 
-	if (oac.HBlockInfo_.type_ != OAConfig::hbExternal) {
+	if (oac.HBlockInfo_.type_ != OAConfig::hbNone && oac.HBlockInfo_.type_ != OAConfig::hbExternal) {
 		size_t offset = 0;
 		if (oac.HBlockInfo_.type_ == OAConfig::hbExtended) {
 			offset += (oac.HBlockInfo_.additional_ + sizeof(unsigned short));
@@ -196,7 +203,8 @@ void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
 		*inUse = 0;
 	}
 	else 
-		memset(tmp, 0, oac.HBlockInfo_.size_);
+		if (oac.HBlockInfo_.type_ == OAConfig::hbExternal)
+			memset(tmp, 0, oac.HBlockInfo_.size_);
 		
 }
 
@@ -277,10 +285,60 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 }
 
 unsigned ObjectAllocator::ValidatePages(VALIDATECALLBACK fn) const{
-  return 0;
+
+	GenericObject * tmpPage = PageListHead;
+	unsigned corrupted = 0;
+	unsigned char * PadLeft = 0, * PadRight = 0;
+
+	if (!oac.PadBytes_)
+		return 0;
+
+	while (tmpPage) {
+
+		PadLeft = reinterpret_cast<unsigned char*>(tmpPage) + headSize - oac.PadBytes_;
+		PadRight = reinterpret_cast<unsigned char*>(tmpPage) + headSize + oas.ObjectSize_;
+
+		for (int i = 0; i < oac.ObjectsPerPage_; ++i) {
+			for (int j = 0; j < oac.PadBytes_; ++j) {
+				if (*(PadLeft+j) != PAD_PATTERN || *(PadRight+j)!= PAD_PATTERN) {
+					++corrupted;
+					fn(reinterpret_cast<unsigned char*>(PadLeft + oac.PadBytes_), oas.ObjectSize_);
+					break; // pages not blocks
+				}
+			}
+			if (i < oac.ObjectsPerPage_ - 1) {
+				PadLeft += perObj;
+				PadRight += perObj;
+			}
+		}
+
+		tmpPage = tmpPage->Next;
+	}
+
+	return corrupted;
 }
 
-unsigned ObjectAllocator::DumpMemoryInUse(DUMPCALLBACK fn) const{return 0;}
+unsigned ObjectAllocator::DumpMemoryInUse(DUMPCALLBACK fn) const{
+
+	GenericObject * tmpPage = PageListHead;
+	
+	while (tmpPage)
+	{
+		unsigned char * datastart = reinterpret_cast<unsigned char*>(tmpPage) + headSize;
+		for (unsigned i = 0; i < oac.ObjectsPerPage_; ++i) {
+			if (*datastart == ALLOCATED_PATTERN) {
+				fn(datastart, oas.ObjectSize_);
+			}
+
+			if (i < oac.ObjectsPerPage_-1)
+				datastart += perObj;
+
+		}
+		tmpPage = tmpPage->Next;
+	}
+
+	return oas.ObjectsInUse_;
+}
 
 unsigned ObjectAllocator::FreeEmptyPages(void){return 0;}
 bool ObjectAllocator::ImplementedExtraCredit(void){return false;}

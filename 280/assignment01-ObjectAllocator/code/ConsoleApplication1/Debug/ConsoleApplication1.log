@@ -1,6 +1,7 @@
-﻿  ObjectAllocator.cpp
-c:\users\a.chengyong\desktop\280\assignment01-objectallocator\code\objectallocator.cpp(99): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+﻿  driver-sample.cpp
+c:\users\a.chengyong\desktop\280\assignment01-objectallocator\code\driver-sample.cpp(99): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\string.h(119): note: see declaration of 'strcpy'
-c:\users\a.chengyong\desktop\280\assignment01-objectallocator\code\objectallocator.cpp(233): warning C4018: '<': signed/unsigned mismatch
+c:\users\a.chengyong\desktop\280\assignment01-objectallocator\code\driver-sample.cpp(100): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\string.h(119): note: see declaration of 'strcpy'
   ConsoleApplication1.vcxproj -> C:\Users\a.chengyong\Desktop\280\assignment01-ObjectAllocator\code\ConsoleApplication1\Debug\ConsoleApplication1.exe
   ConsoleApplication1.vcxproj -> C:\Users\a.chengyong\Desktop\280\assignment01-ObjectAllocator\code\ConsoleApplication1\Debug\ConsoleApplication1.pdb (Full PDB)
