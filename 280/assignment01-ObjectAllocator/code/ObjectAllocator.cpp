@@ -53,7 +53,7 @@ ObjectAllocator::~ObjectAllocator() throw() {
 void * ObjectAllocator::Allocate(const char *label) throw(OAException) {
 
 	//GenericObject * tmp = FreeListHead;
-	GenericObject * tmp = nullptr;
+	GenericObject * tmp = 0;
 
 	if (oac.UseCPPMemManager_) {
 		//char * charTmp = reinterpret_cast<char*>(tmp);
@@ -67,7 +67,7 @@ void * ObjectAllocator::Allocate(const char *label) throw(OAException) {
 		return new char[oas.ObjectSize_];
 	}
 
-	if (!FreeListHead) MakePage(label);
+	if (!FreeListHead) MakePage();
 
 	tmp = FreeListHead;
 	FreeListHead = FreeListHead->Next;
@@ -119,12 +119,12 @@ unsigned ObjectAllocator::countAlign(size_t size_, bool interAlignment){
   size_t tmpSize = size_ + ((interAlignment)?2:1) * oac.PadBytes_ + oac.HBlockInfo_.size_;
   size_t tmpAlignSize = tmpSize;
   while(tmpAlignSize % oac.Alignment_) ++tmpAlignSize;
-  return (tmpAlignSize - tmpSize);
+  return static_cast<unsigned>(tmpAlignSize - tmpSize);
 
 }
 
-void ObjectAllocator::MakePage(const char * label) throw(OAException) {
-  char * tmphead = nullptr;
+void ObjectAllocator::MakePage() throw(OAException) {
+  char * tmphead = 0;
 
   if (oas.PagesInUse_ >= oac.MaxPages_)
 	  throw OAException(OAException::E_NO_PAGES," no more pages");
@@ -160,11 +160,9 @@ void ObjectAllocator::MakePage(const char * label) throw(OAException) {
     for (size_t i = 0; i < oac.ObjectsPerPage_; ++i){
 		reinterpret_cast<GenericObject*>(tmphead)->Next = prev;
 		
-		/*FreeListHead = reinterpret_cast<GenericObject*>(tmphead);
-		FreeListHead->Next = prev;*/
 		prev = reinterpret_cast<GenericObject*>(tmphead);
-		SetBlockMem(reinterpret_cast<char *>(prev));
-		SetHeaderInfo(reinterpret_cast<char *>(prev) - oac.PadBytes_  - oac.HBlockInfo_.size_, label);
+		SetBlockMem(reinterpret_cast<unsigned char *>(prev),i);
+		SetHeaderInfo(reinterpret_cast<char *>(prev) - oac.PadBytes_  - oac.HBlockInfo_.size_);
 
 		tmphead += (oas.ObjectSize_ + 2* oac.PadBytes_ + oac.InterAlignSize_ + oac.HBlockInfo_.size_);
     
@@ -175,9 +173,13 @@ void ObjectAllocator::MakePage(const char * label) throw(OAException) {
 }
 
 
-void ObjectAllocator::SetBlockMem(char * tmp){
+void ObjectAllocator::SetBlockMem(unsigned char * tmp,size_t i){
+  
   memset(tmp - oac.PadBytes_, PAD_PATTERN, oac.PadBytes_);
   memset(tmp + oas.ObjectSize_, PAD_PATTERN, oac.PadBytes_);
+ // unsigned char * tmpp = tmp + oas.ObjectSize_ + oac.PadBytes_;
+  if (i != oac.ObjectsPerPage_ -1)
+	memset(tmp + oas.ObjectSize_ + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
   /*
   memset(tmp + tmpObjsize, PAD_PATTERN , oac.PadBytes_);
   memset(tmp + tmpObjsize + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
@@ -186,7 +188,7 @@ void ObjectAllocator::SetBlockMem(char * tmp){
 		*/
 }
 
-void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
+void ObjectAllocator::SetHeaderInfo(char * tmp){
 
 	if (oac.HBlockInfo_.type_ != OAConfig::hbNone && oac.HBlockInfo_.type_ != OAConfig::hbExternal) {
 		size_t offset = 0;
@@ -211,14 +213,8 @@ void ObjectAllocator::SetHeaderInfo(char * tmp, const char * label){
 void ObjectAllocator::Free(void *Object) throw(OAException){
 
   unsigned char * tmp = reinterpret_cast<unsigned char*>(Object);
-  bool freed = true;
-  bool corrupted = false;
 
   if (!oac.UseCPPMemManager_){
-
-     
-
-//std::cout << "0" << std::endl;
 
 	  if(static_cast<unsigned char>(*(tmp + sizeof(void*))) == FREED_PATTERN)
 		  throw OAException(OAException::E_MULTIPLE_FREE, "freed already");
@@ -238,7 +234,7 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 		  tmpPage = tmpPage->Next;
 	  }
 
-	  for (int i = 0; i < oac.PadBytes_; ++i) {
+	  for (unsigned i = 0; i < oac.PadBytes_; ++i) {
 
 		  if (*(tmp - oac.PadBytes_ + i) != PAD_PATTERN ||
 			  *(tmp + oas.ObjectSize_ + i) != PAD_PATTERN) 
@@ -298,8 +294,8 @@ unsigned ObjectAllocator::ValidatePages(VALIDATECALLBACK fn) const{
 		PadLeft = reinterpret_cast<unsigned char*>(tmpPage) + headSize - oac.PadBytes_;
 		PadRight = reinterpret_cast<unsigned char*>(tmpPage) + headSize + oas.ObjectSize_;
 
-		for (int i = 0; i < oac.ObjectsPerPage_; ++i) {
-			for (int j = 0; j < oac.PadBytes_; ++j) {
+		for (unsigned i = 0; i < oac.ObjectsPerPage_; ++i) {
+			for (unsigned j = 0; j < oac.PadBytes_; ++j) {
 				if (*(PadLeft+j) != PAD_PATTERN || *(PadRight+j)!= PAD_PATTERN) {
 					++corrupted;
 					fn(reinterpret_cast<unsigned char*>(PadLeft + oac.PadBytes_), oas.ObjectSize_);

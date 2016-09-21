@@ -1,4 +1,4 @@
-#include <iostream>
+#include <iostream> 
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -17,10 +17,10 @@ int SHOW_EXCEPTIONS = 0;
 
 struct Student
 {
-  int Age;
+  int Age;       
   float GPA;
   long Year;
-  long ID;
+  long ID;  
 };
 
 struct Employee
@@ -56,14 +56,14 @@ void TestFreeEmptyPages1(void);       // debug, padding=2
 void TestFreeEmptyPages2(void);       // debug, padding=2, header, align=16
 void TestFreeEmptyPages3(void);       // debug, padding=6
 void StressFreeChecking(void);        //
-void Stress(bool UseNewDelete);       //
+void Stress(bool UseNewDelete);       // 
 
 struct Person
 {
-  char lastName[12];
-  char firstName[12];
-  float salary;
-  int years;
+  char lastName[12];   
+  char firstName[12];  
+  float salary;        
+  int years;           
 };
 
 struct Person PEOPLE[] = {
@@ -210,7 +210,7 @@ void *ptrs[total];
 void Stress(bool UseNewDelete)
 {
   ObjectAllocator *oa;
-
+    
   try
   {
     bool newdel = UseNewDelete;
@@ -257,11 +257,11 @@ void StressFreeChecking(const OAConfig::HeaderBlockInfo& header)
   const unsigned total = objects * pages;
 
   ObjectAllocator *oa;
-
+    
   char **ptrs = new char*[total];
-
+  
   try
-  {
+  { 
     bool newdel = false;
     bool debug = true;
     unsigned padbytes = 0;
@@ -325,7 +325,7 @@ void TestFreeEmptyPages1(void)
     OAConfig config(newdel, objects, pages, debug, padbytes, header, alignment);
     oa  = new ObjectAllocator(sizeof(Student), config);
 
-    unsigned width = 32;
+    unsigned width = 32; 
 
     for (int i = 0; i < total; i++)
     {
@@ -490,7 +490,7 @@ void TestFreeEmptyPages3(void)
     OAConfig config(newdel, objects, pages, debug, padbytes, header, alignment);
     oa  = new ObjectAllocator(sizeof(Student), config);
 
-    unsigned width = 32;
+    unsigned width = 32; 
 
     for (int i = 0; i < total; i++)
     {
@@ -533,7 +533,7 @@ void TestBasicHeaderBlocks()
 {
   ObjectAllocator *oa = 0;
 
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -601,7 +601,7 @@ void TestBasicHeaderBlocks()
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestBasicHeaderBlocks."  << endl;
@@ -619,7 +619,7 @@ void TestBasicHeaderBlocks()
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestBasicHeaderBlocks."  << endl;
@@ -658,7 +658,7 @@ void TestExtendedHeaderBlocks(unsigned size)
   ObjectAllocator *oa = 0;
   unsigned wrap = 32;
 
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -733,7 +733,7 @@ void TestExtendedHeaderBlocks(unsigned size)
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestExtendedHeaderBlocks."  << endl;
@@ -753,7 +753,7 @@ void TestExtendedHeaderBlocks(unsigned size)
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestExtendedHeaderBlocks."  << endl;
@@ -839,7 +839,7 @@ void TestExternalHeaderBlocks()
   ObjectAllocator *oa = 0;
   unsigned wrap = 32;
 
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -910,7 +910,7 @@ void TestExternalHeaderBlocks()
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestExternalHeaderBlocks."  << endl;
@@ -929,7 +929,7 @@ void TestExternalHeaderBlocks()
   }
   catch (const OAException& e)
   {
-    if (SHOW_EXCEPTIONS)
+    if (SHOW_EXCEPTIONS) 
       cout << e.what() << endl;
     else
       cout << "Exception thrown from Free in TestExternalHeaderBlocks."  << endl;
@@ -949,7 +949,7 @@ void TestExternalHeaderBlocks()
 //****************************************************************************************************
 void DoStudents(unsigned padding, bool printall)
 {
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -959,7 +959,6 @@ void DoStudents(unsigned padding, bool printall)
 
     OAConfig config(newdel, 4, 2, debug, padbytes, header, alignment);
     studentObjectMgr = new ObjectAllocator(sizeof(Student), config);
-	
   }
   catch (const OAException& e)
   {
@@ -983,7 +982,7 @@ void DoStudents(unsigned padding, bool printall)
   try
   {
     pStudent1 = static_cast<Student *>( studentObjectMgr->Allocate() );
-    PrintCounts(studentObjectMgr);   
+    PrintCounts(studentObjectMgr);
     if (printall)
       DumpPages(studentObjectMgr, wrap);
     pStudent2 = static_cast<Student *>( studentObjectMgr->Allocate() );
@@ -994,7 +993,6 @@ void DoStudents(unsigned padding, bool printall)
     PrintCounts(studentObjectMgr);
     if (printall)
       DumpPages(studentObjectMgr, wrap);
-  
   }
   catch (const OAException& e)
   {
@@ -1004,7 +1002,7 @@ void DoStudents(unsigned padding, bool printall)
       cout << "Exception thrown from Allocate in DoStudents."  << endl;
   }
   catch(...)
-  {
+  { 
     cout << "Unexpected exception thrown from Allocate in DoStudents."  << endl;
   }
 
@@ -1131,7 +1129,7 @@ void DoEmployees(void)
   Employee *pEmployee4[7];
   for (int i = 0; i < 7; i++)
   {
-    try
+    try 
     {
         // Need to use /EHa, not /EHs
         // ******************************************* Puts &employeeObjMgr in ecx
@@ -1155,7 +1153,7 @@ void DoEmployees(void)
     }
   }
     // ************************* blindly pushes ecx as if it still has &empObjMgr
-  PrintCounts(employeeObjectMgr);
+  PrintCounts(employeeObjectMgr); 
 
   try
   {
@@ -1182,7 +1180,7 @@ void DoEmployees(void)
   try {
     employeeObjectMgr->Free(pEmployee1);
   }
-  catch (const OAException& e)
+  catch (const OAException& e) 
   {
     if (SHOW_EXCEPTIONS)
       cout << e.what() << endl;
@@ -1195,11 +1193,11 @@ void DoEmployees(void)
   }
 
     // Free an invalid pointer (bad boundary condition)
-  try
+  try 
   {
     employeeObjectMgr->Free(reinterpret_cast<char *>(pEmployee4[0] + 4));
   }
-  catch (const OAException& e)
+  catch (const OAException& e) 
   {
     if (SHOW_EXCEPTIONS)
       cout << e.what() << endl;
@@ -1219,7 +1217,7 @@ void DoEmployees(void)
 //****************************************************************************************************
 void DisableOA(void)
 {
-  try
+  try 
   {
     bool newdel = true;
     bool debug = false;
@@ -1348,7 +1346,7 @@ void TestCorruption(void)
   unsigned i;
   unsigned wrap = 32;
   Student *pStudent1, *pStudent2 = 0;
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -1362,7 +1360,7 @@ void TestCorruption(void)
     oa = new ObjectAllocator(sizeof(Student), config);
     pStudent1 = static_cast<Student *>( oa->Allocate() );
     pStudent2 = static_cast<Student *>( oa->Allocate() );
-
+    
     PrintConfig(oa);
     PrintCounts(oa);
     DumpPages(oa, wrap);
@@ -1472,7 +1470,7 @@ void TestLeak(void)
 
   for (unsigned i = 0; i < count; i++)
   {
-    try
+    try 
     {
       pEmps[i] = static_cast<Employee *>(employeeObjectMgr->Allocate());
       FillEmployee(*pEmps[i]);
@@ -1491,7 +1489,7 @@ void TestLeak(void)
       cout << "Unexpected exception thrown from Allocate in TestLeak."  << endl;
     }
   }
-  PrintCounts(employeeObjectMgr);
+  PrintCounts(employeeObjectMgr); 
 
   try
   {
@@ -1551,7 +1549,7 @@ void TestValidate(void)
   unsigned i, padbytes = 8;
   unsigned wrap = 32;
   Student *pStudent1 = 0, *pStudent2 = 0, *pStudent7 = 0;
-  try
+  try 
   {
     bool newdel = false;
     bool debug = true;
@@ -1687,7 +1685,7 @@ void TestAlignment(void)
     return;
 
   ObjectAllocator *oa = 0;
-  try
+  try 
   {
     unsigned wrap = 32;
 
@@ -1776,7 +1774,7 @@ void DumpPages(const ObjectAllocator *nm, unsigned width)
 {
   const unsigned char *pages = static_cast<const unsigned char *>(nm->GetPageList());
   const unsigned char *realpage = pages;
-
+  
   size_t header_size = nm->GetConfig().HBlockInfo_.size_;
 
   while (pages)
@@ -1873,7 +1871,7 @@ void DumpPages(const ObjectAllocator *nm, unsigned width)
         else
           printf(" %s", "XX");
       }
-
+        
         // remaining bytes
       for (unsigned j = 0; j < nm->GetStats().ObjectSize_ - sizeof(void *); count++, j++)
       {
@@ -1908,7 +1906,7 @@ void DumpExternalHeaders(const ObjectAllocator *oa, const unsigned char *p)
 {
   unsigned char *page = const_cast<unsigned char *>(p);
 
-  unsigned padbytes = oa->GetConfig().PadBytes_;
+  unsigned padbytes = oa->GetConfig().PadBytes_;  
   size_t header_size = oa->GetConfig().HBlockInfo_.size_;
   unsigned leftalign = oa->GetConfig().LeftAlignSize_;
   unsigned interalign = oa->GetConfig().InterAlignSize_;
@@ -1939,7 +1937,7 @@ void DumpPagesEx(const ObjectAllocator *nm, unsigned width)
 {
   const unsigned char *pages = static_cast<const unsigned char *>(nm->GetPageList());
   const unsigned char *realpage = pages;
-
+  
   size_t header_size = nm->GetConfig().HBlockInfo_.size_;
 
   while (pages)
@@ -2040,7 +2038,7 @@ void DumpPagesEx(const ObjectAllocator *nm, unsigned width)
         else
           printf(" %s", "XX");
       }
-
+        
         // remaining bytes
       for (unsigned j = 0; j < nm->GetStats().ObjectSize_ - sizeof(void *); count++, j++)
       {
@@ -2079,7 +2077,7 @@ void DumpPagesEx(const ObjectAllocator *nm, unsigned width)
 void Test1(void)
 {
   ObjectAllocator *oa;
-
+    
     bool newdel = false;
     bool debug = false;
     unsigned padbytes = 0;
@@ -2132,150 +2130,170 @@ int main(int argc, char **argv)
       DoStudents(0, true);
       cout << endl;
       break;
-	case 3:
+    case 3:
       cout << "============================== Employees..." << endl;
       DoEmployees();
       cout << endl;
       break;
-	case 4:
-		cout << "============================== Test padding..." << endl;
-		TestPadding(6);
-		cout << endl;
-		break;
-	case 5:
-		cout << "============================== Test padding..." << endl;
-		TestPadding(10);
-		cout << endl;
-		break;
-	case 6:
-		cout << "============================== Test basic header blocks..." << endl;
-		TestBasicHeaderBlocks();
-		cout << endl;
-		break;
-	case 7:
-		cout << "============================== Test extended header blocks(1)..." << endl;
-		TestExtendedHeaderBlocks(1);
-		cout << endl;
-	break;
-	case 8:
-		cout << "============================== Test external header blocks..." << endl;
-		TestExternalHeaderBlocks();
-		cout << endl;
-	break;
-	case 9:
-		cout << "============================== Test corruption..." << endl;
-		TestCorruption();
-		cout << endl;
-		break;
-	case 10:
-		cout << "============================== Test using new/delete..." << endl;
-		DisableOA();
-		cout << endl;
-		break;
-	case 11:
-		cout << "============================== Test leak..." << endl;
-		TestLeak();
-		cout << endl;
-	break;
-	case 12:
-		cout << "============================== Test validate..." << endl;
-		TestValidate();
-		cout << endl;
-	break;
-	case 13:
-		cout << "============================== Test free checking basic (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbBasic));
-		cout << endl;
-	break;
-	case 14:
-		cout << "============================== Test free checking extended (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExtended, 1));
-		cout << endl;
-	break;
-	case 15:
-		cout << "============================== Test free checking external (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExternal));
-		cout << endl;
-	break;
-	case 16:
-		cout << "============================== Test stress using new/delete..." << endl;
-		Stress(true);
-		cout << endl;
-	break;
-	case 17:
-		cout << "============================== Test stress using allocator..." << endl;
-		Stress(false);
-		cout << endl;
-	break;
-	default:
-		cout << "============================== Students..." << endl;
-		DoStudents(0, false);
-		cout << endl;
-		cout << "============================== Students..." << endl;
-		DoStudents(0, true);
-		cout << endl;
-		cout << "============================== Employees..." << endl;
-		DoEmployees();
-		cout << endl;
-		cout << "============================== Test padding..." << endl;
-		TestPadding(6);
-		cout << endl;
-		cout << "============================== Test padding..." << endl;
-		TestPadding(10);
-		cout << endl;
-		cout << "============================== Test basic header blocks..." << endl;
-		TestBasicHeaderBlocks();
-		cout << endl;
-		cout << "============================== Test extended header blocks(1)..." << endl;
-		TestExtendedHeaderBlocks(1);
-		cout << endl;
-		cout << "============================== Test external header blocks..." << endl;
-		TestExternalHeaderBlocks();
-		cout << endl;
-		cout << "============================== Test corruption..." << endl;
-		TestCorruption();
-		cout << endl;
-		cout << "============================== Test using new/delete..." << endl;
-		DisableOA();
-		cout << endl;
-		cout << "============================== Test leak..." << endl;
-		TestLeak();
-		cout << endl;
-		cout << "============================== Test validate..." << endl;
-		TestValidate();
-		cout << endl;
-		cout << "============================== Test free checking basic (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbBasic));
-		cout << endl;
-		cout << "============================== Test free checking extended (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExtended, 1));
-		cout << endl;
-		cout << "============================== Test free checking external (stress)..." << endl;
-		StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExternal));
-		cout << endl;
-		cout << "============================== Test stress using new/delete..." << endl;
-		Stress(true);
-		cout << endl;
-		cout << "============================== Test stress using allocator..." << endl;
-		Stress(false);
-		cout << endl;
-
+    case 4:
+      cout << "============================== Test padding..." << endl;
+      TestPadding(6);
+      cout << endl;
+      break;
+    case 5:
+      cout << "============================== Test padding..." << endl;
+      TestPadding(10);
+      cout << endl;
+      break;
+    case 6:
+      cout << "============================== Test basic header blocks..." << endl;
+      TestBasicHeaderBlocks();
+      cout << endl;
+      break;
+    case 7:
+      cout << "============================== Test extended header blocks(1)..." << endl;
+      TestExtendedHeaderBlocks(1);
+      cout << endl;
+      break;
+    case 8:
+      cout << "============================== Test external header blocks..." << endl;
+      TestExternalHeaderBlocks();
+      cout << endl;
+      break;
+    case 9:
+      cout << "============================== Test corruption..." << endl;
+      TestCorruption();
+      cout << endl;
+      break;
+    case 10:
+      cout << "============================== Test using new/delete..." << endl;
+      DisableOA();
+      cout << endl;
+      break;
+    case 11:
+      cout << "============================== Test leak..." << endl;
+      TestLeak(); 
+      cout << endl;
+      break;
+    case 12:
+      cout << "============================== Test validate..." << endl;
+      TestValidate();
+      cout << endl;
+      break;
+    case 13:
+      cout << "============================== Test free checking basic (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbBasic));
+      cout << endl;
+      break;
+    case 14:
+      cout<< "============================== Test free checking extended (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExtended, 1));
+      cout << endl;
+      break;
+    case 15:
+      cout << "============================== Test free checking external (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExternal));
+      cout << endl;
+      break;
+    case 16:
+      cout << "============================== Test stress using new/delete..." << endl;
+      Stress(true);
+      cout << endl;
+      break;
+    case 17:
+      cout << "============================== Test stress using allocator..." << endl;
+      Stress(false);
+      cout << endl;
+      break;
+  #if 0
+    case 18:
+      cout << "============================== Test alignment..." << endl;
+      TestAlignment();
+      cout << endl;
+      break;
+    case 19:
+      cout << "============================== Test free empty pages 1..." << endl;
+      TestFreeEmptyPages1(); 
+      cout << endl;
+      break;
+    case 20:
+      cout << "============================== Test free empty pages 2..." << endl;
+      TestFreeEmptyPages2(); 
+      cout << endl;
+      break;
+    case 21:
+      cout << "============================== Test free empty pages 3..." << endl;
+      TestFreeEmptyPages3(); 
+      cout << endl;
+      break;
+  #endif
+    default:
+      cout << "============================== Students..." << endl;
+      DoStudents(0, false);
+      cout << endl;
+      cout << "============================== Students..." << endl;
+      DoStudents(0, true);
+      cout << endl;
+      cout << "============================== Employees..." << endl;
+      DoEmployees();
+      cout << endl;
+      cout << "============================== Test padding..." << endl;
+      TestPadding(6);
+      cout << endl;
+      cout << "============================== Test padding..." << endl;
+      TestPadding(10);
+      cout << endl;
+      cout << "============================== Test basic header blocks..." << endl;
+      TestBasicHeaderBlocks();
+      cout << endl;
+      cout << "============================== Test extended header blocks(1)..." << endl;
+      TestExtendedHeaderBlocks(1);
+      cout << endl;
+      cout << "============================== Test external header blocks..." << endl;
+      TestExternalHeaderBlocks();
+      cout << endl;
+      cout << "============================== Test corruption..." << endl;
+      TestCorruption();
+      cout << endl;
+      cout << "============================== Test using new/delete..." << endl;
+      DisableOA();
+      cout << endl;
+      cout << "============================== Test leak..." << endl;
+      TestLeak(); 
+      cout << endl;
+      cout << "============================== Test validate..." << endl;
+      TestValidate();
+      cout << endl;
+      cout << "============================== Test free checking basic (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbBasic));
+      cout << endl;
+      cout<< "============================== Test free checking extended (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExtended, 1));
+      cout << endl;
+      cout << "============================== Test free checking external (stress)..." << endl;
+      StressFreeChecking(OAConfig::HeaderBlockInfo(OAConfig::hbExternal));
+      cout << endl;
+      cout << "============================== Test stress using new/delete..." << endl;
+      Stress(true);
+      cout << endl;
+      cout << "============================== Test stress using allocator..." << endl;
+      Stress(false);
+      cout << endl;
       #if 0
         cout << "============================== Test alignment..." << endl;
         TestAlignment();
         cout << endl;
         cout << "============================== Test free empty pages 1..." << endl;
-        TestFreeEmptyPages1();
+        TestFreeEmptyPages1(); 
         cout << endl;
         cout << "============================== Test free empty pages 2..." << endl;
-        TestFreeEmptyPages2();
+        TestFreeEmptyPages2(); 
         cout << endl;
         cout << "============================== Test free empty pages 3..." << endl;
-        TestFreeEmptyPages3();
+        TestFreeEmptyPages3(); 
         cout << endl;
       #endif
       break;
-
   }
 
   //OAConfig config(false, 16, 4, false);
@@ -2284,7 +2302,7 @@ int main(int argc, char **argv)
     // These should fail to compile:
   //ObjectAllocator c(a);
   //a = b;
-
+  
 
   return 0;
 }
