@@ -180,12 +180,7 @@ void ObjectAllocator::SetBlockMem(unsigned char * tmp,size_t i){
  // unsigned char * tmpp = tmp + oas.ObjectSize_ + oac.PadBytes_;
   if (i != oac.ObjectsPerPage_ -1)
 	memset(tmp + oas.ObjectSize_ + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
-  /*
-  memset(tmp + tmpObjsize, PAD_PATTERN , oac.PadBytes_);
-  memset(tmp + tmpObjsize + oac.PadBytes_, ALIGN_PATTERN, oac.InterAlignSize_);
-  memset(tmp + tmpObjsize + oac.PadBytes_ + oac.InterAlignSize_ + oac.HBlockInfo_.size_,
-        PAD_PATTERN , oac.PadBytes_);
-		*/
+
 }
 
 void ObjectAllocator::SetHeaderInfo(char * tmp){
@@ -224,7 +219,7 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 		  if (tmp > reinterpret_cast<unsigned char*>(tmpPage) &&
 		  tmp < reinterpret_cast<unsigned char*>(tmpPage) + oas.PageSize_){
 			  unsigned char * blockStart = reinterpret_cast<unsigned char*>(tmpPage) + headSize;
-			//  std::cout << (tmp - blockStart) % perObj << std::endl;
+
 			  if ((tmp - blockStart) % perObj)
 				 throw OAException(OAException::E_BAD_BOUNDARY, "bad Boundary"); 
 		  }
@@ -257,7 +252,7 @@ void ObjectAllocator::Free(void *Object) throw(OAException){
 	   }
 
 	   if (oac.HBlockInfo_.type_ == OAConfig::hbExternal) {
-		//   std::cout << oac.HBlockInfo_.size_ << " " << oac.EXTERNAL_HEADER_SIZE << std::endl;
+
 		   MemBlockInfo ** tmpBlock = reinterpret_cast<MemBlockInfo **> (reinterpret_cast<char*>(tmp) - oac.PadBytes_ - oac.HBlockInfo_.size_);
 
 		   delete[] (*tmpBlock)->label;
