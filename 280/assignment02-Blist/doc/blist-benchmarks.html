@@ -1,0 +1,649 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../new.css">
+<title>BList Benchmarks</title>
+</head>
+
+
+<body>  
+<center>
+<h1>BList Benchmarks</h1>
+</center>
+
+<p class="SectionHeader">Comparing Various Systems</p>
+
+<a href="computer-specs.html">Detailed specs</a>
+<p>
+Inserting 100,000 items into a BList of various sizes:
+
+<blockquote>
+<table border=1 cellspacing=0 cellpadding=0>
+<tr>
+<th>Maya</th><th>Olga</th><th>Veronica</th><th>Jocko</th><th>Volper</th>
+</tr>
+<tr>
+<td>
+<blockquote>
+<pre>
+Asize: 1
+Nsize: 24
+Items: 100000
+Nodes: 100000
+Average items per node: 1
+Node utilization: 100%
+
+<font color="blue">Elapsed time: 27.29 secs</font>
+==============================
+Asize: 2
+Nsize: 32
+Items: 100000
+Nodes: 61400
+Average items per node: 1.629
+Node utilization: 81.4%
+
+<font color="blue">Elapsed time: 16.54 secs</font>
+==============================
+Asize: 4
+Nsize: 40
+Items: 100000
+Nodes: 33250
+Average items per node: 3.008
+Node utilization: 75.2%
+
+<font color="blue">Elapsed time: 7.85 secs</font>
+==============================
+Asize: 8
+Nsize: 56
+Items: 100000
+Nodes: 17370
+Average items per node: 5.757
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 3.97 secs</font>
+==============================
+Asize: 16
+Nsize: 88
+Items: 100000
+Nodes: 8856
+Average items per node: 11.29
+Node utilization: 70.6%
+
+<font color="blue">Elapsed time: 1.8 secs</font>
+==============================
+Asize: 32
+Nsize: 152
+Items: 100000
+Nodes: 4410
+Average items per node: 22.68
+Node utilization: 70.9%
+
+<font color="blue">Elapsed time: 0.9 secs</font>
+==============================
+Asize: 64
+Nsize: 280
+Items: 100000
+Nodes: 2220
+Average items per node: 45.05
+Node utilization: 70.4%
+
+<font color="blue">Elapsed time: 0.38 secs</font>
+==============================
+Asize: 128
+Nsize: 536
+Items: 100000
+Nodes: 1085
+Average items per node: 92.17
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 0.16 secs</font>
+==============================
+Asize: 256
+Nsize: 1048
+Items: 100000
+Nodes: 523
+Average items per node: 191.2
+Node utilization: 74.7%
+
+<font color="blue">Elapsed time: 0.07 secs</font>
+==============================
+Asize: 512
+Nsize: 2072
+Items: 100000
+Nodes: 257
+Average items per node: 389.1
+Node utilization: 76%
+
+<font color="blue">Elapsed time: 0.05 secs</font>
+==============================
+Asize: 1024
+Nsize: 4120
+Items: 100000
+Nodes: 128
+Average items per node: 781.2
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.05 secs</font>
+==============================
+Asize: 2048
+Nsize: 8216
+Items: 100000
+Nodes: 64
+Average items per node: 1562
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.08 secs</font>
+==============================
+Asize: 4096
+Nsize: 16408
+Items: 100000
+Nodes: 32
+Average items per node: 3125
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.16 secs</font>
+==============================
+</pre>
+</blockquote>
+</td>
+
+<td>
+<blockquote>
+<pre>
+Asize: 1
+Nsize: 24
+Items: 100000
+Nodes: 100000
+Average items per node: 1
+Node utilization: 100%
+
+<font color="blue">Elapsed time: 46.34 secs</font>
+==============================
+Asize: 2
+Nsize: 32
+Items: 100000
+Nodes: 61400
+Average items per node: 1.629
+Node utilization: 81.4%
+
+<font color="blue">Elapsed time: 27.56 secs</font>
+==============================
+Asize: 4
+Nsize: 40
+Items: 100000
+Nodes: 33250
+Average items per node: 3.008
+Node utilization: 75.2%
+
+<font color="blue">Elapsed time: 13.21 secs</font>
+==============================
+Asize: 8
+Nsize: 56
+Items: 100000
+Nodes: 17370
+Average items per node: 5.757
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 6.42 secs</font>
+==============================
+Asize: 16
+Nsize: 88
+Items: 100000
+Nodes: 8856
+Average items per node: 11.29
+Node utilization: 70.6%
+
+<font color="blue">Elapsed time: 2.8 secs</font>
+==============================
+Asize: 32
+Nsize: 152
+Items: 100000
+Nodes: 4410
+Average items per node: 22.68
+Node utilization: 70.9%
+
+<font color="blue">Elapsed time: 1.41 secs</font>
+==============================
+Asize: 64
+Nsize: 280
+Items: 100000
+Nodes: 2220
+Average items per node: 45.05
+Node utilization: 70.4%
+
+<font color="blue">Elapsed time: 0.53 secs</font>
+==============================
+Asize: 128
+Nsize: 536
+Items: 100000
+Nodes: 1085
+Average items per node: 92.17
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 0.19 secs</font>
+==============================
+Asize: 256
+Nsize: 1048
+Items: 100000
+Nodes: 523
+Average items per node: 191.2
+Node utilization: 74.7%
+
+<font color="blue">Elapsed time: 0.1 secs</font>
+==============================
+Asize: 512
+Nsize: 2072
+Items: 100000
+Nodes: 257
+Average items per node: 389.1
+Node utilization: 76%
+
+<font color="blue">Elapsed time: 0.06 secs</font>
+==============================
+Asize: 1024
+Nsize: 4120
+Items: 100000
+Nodes: 128
+Average items per node: 781.2
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.08 secs</font>
+==============================
+Asize: 2048
+Nsize: 8216
+Items: 100000
+Nodes: 64
+Average items per node: 1562
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.13 secs</font>
+==============================
+Asize: 4096
+Nsize: 16408
+Items: 100000
+Nodes: 32
+Average items per node: 3125
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.25 secs</font>
+==============================
+</pre>
+</blockquote>
+</td>
+
+<td><blockquote><pre>
+Asize: 1
+Nsize: 24
+Items: 100000
+Nodes: 100000
+Average items per node: 1
+Node utilization: 100%
+
+<font color="blue">Elapsed time: 40.92 secs</font>
+==============================
+Asize: 2
+Nsize: 32
+Items: 100000
+Nodes: 61400
+Average items per node: 1.629
+Node utilization: 81.4%
+
+<font color="blue">Elapsed time: 23.78 secs</font>
+==============================
+Asize: 4
+Nsize: 40
+Items: 100000
+Nodes: 33250
+Average items per node: 3.008
+Node utilization: 75.2%
+
+<font color="blue">Elapsed time: 10.21 secs</font>
+==============================
+Asize: 8
+Nsize: 56
+Items: 100000
+Nodes: 17370
+Average items per node: 5.757
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 5.27 secs</font>
+==============================
+Asize: 16
+Nsize: 88
+Items: 100000
+Nodes: 8856
+Average items per node: 11.29
+Node utilization: 70.6%
+
+<font color="blue">Elapsed time: 2.39 secs</font>
+==============================
+Asize: 32
+Nsize: 152
+Items: 100000
+Nodes: 4410
+Average items per node: 22.68
+Node utilization: 70.9%
+
+<font color="blue">Elapsed time: 1.17 secs</font>
+==============================
+Asize: 64
+Nsize: 280
+Items: 100000
+Nodes: 2220
+Average items per node: 45.05
+Node utilization: 70.4%
+
+<font color="blue">Elapsed time: 0.5 secs</font>
+==============================
+Asize: 128
+Nsize: 536
+Items: 100000
+Nodes: 1085
+Average items per node: 92.17
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 0.21 secs</font>
+==============================
+Asize: 256
+Nsize: 1048
+Items: 100000
+Nodes: 523
+Average items per node: 191.2
+Node utilization: 74.7%
+
+<font color="blue">Elapsed time: 0.09 secs</font>
+==============================
+Asize: 512
+Nsize: 2072
+Items: 100000
+Nodes: 257
+Average items per node: 389.1
+Node utilization: 76%
+
+<font color="blue">Elapsed time: 0.07 secs</font>
+==============================
+Asize: 1024
+Nsize: 4120
+Items: 100000
+Nodes: 128
+Average items per node: 781.2
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.06 secs</font>
+==============================
+Asize: 2048
+Nsize: 8216
+Items: 100000
+Nodes: 64
+Average items per node: 1562
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.12 secs</font>
+==============================
+Asize: 4096
+Nsize: 16408
+Items: 100000
+Nodes: 32
+Average items per node: 3125
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.23 secs</font>
+==============================
+</pre></blockquote></td>
+
+<td><blockquote><pre>
+Asize: 1
+Nsize: 24
+Items: 100000
+Nodes: 100000
+Average items per node: 1
+Node utilization: 100%
+
+<font color="blue">Elapsed time: 130.8 secs</font>
+==============================
+Asize: 2
+Nsize: 32
+Items: 100000
+Nodes: 61400
+Average items per node: 1.629
+Node utilization: 81.4%
+
+<font color="blue">Elapsed time: 70.93 secs</font>
+==============================
+Asize: 4
+Nsize: 40
+Items: 100000
+Nodes: 33250
+Average items per node: 3.008
+Node utilization: 75.2%
+
+<font color="blue">Elapsed time: 19.43 secs</font>
+==============================
+Asize: 8
+Nsize: 56
+Items: 100000
+Nodes: 17370
+Average items per node: 5.757
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 6.07 secs</font>
+==============================
+Asize: 16
+Nsize: 88
+Items: 100000
+Nodes: 8856
+Average items per node: 11.29
+Node utilization: 70.6%
+
+<font color="blue">Elapsed time: 3.06 secs</font>
+==============================
+Asize: 32
+Nsize: 152
+Items: 100000
+Nodes: 4410
+Average items per node: 22.68
+Node utilization: 70.9%
+
+<font color="blue">Elapsed time: 1.36 secs</font>
+==============================
+Asize: 64
+Nsize: 280
+Items: 100000
+Nodes: 2220
+Average items per node: 45.05
+Node utilization: 70.4%
+
+<font color="blue">Elapsed time: 0.69 secs</font>
+==============================
+Asize: 128
+Nsize: 536
+Items: 100000
+Nodes: 1085
+Average items per node: 92.17
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 0.3 secs</font>
+==============================
+Asize: 256
+Nsize: 1048
+Items: 100000
+Nodes: 523
+Average items per node: 191.2
+Node utilization: 74.7%
+
+<font color="blue">Elapsed time: 0.14 secs</font>
+==============================
+Asize: 512
+Nsize: 2072
+Items: 100000
+Nodes: 257
+Average items per node: 389.1
+Node utilization: 76%
+
+<font color="blue">Elapsed time: 0.07 secs</font>
+==============================
+Asize: 1024
+Nsize: 4120
+Items: 100000
+Nodes: 128
+Average items per node: 781.2
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.11 secs</font>
+==============================
+Asize: 2048
+Nsize: 8216
+Items: 100000
+Nodes: 64
+Average items per node: 1562
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.18 secs</font>
+==============================
+Asize: 4096
+Nsize: 16408
+Items: 100000
+Nodes: 32
+Average items per node: 3125
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.36 secs</font>
+==============================
+</pre></blockquote></td>
+
+<td><blockquote><pre>
+Asize: 1
+Nsize: 24
+Items: 100000
+Nodes: 100000
+Average items per node: 1
+Node utilization: 100%
+
+<font color="blue">Elapsed time: 38.2 secs</font>
+==============================
+Asize: 2
+Nsize: 32
+Items: 100000
+Nodes: 61400
+Average items per node: 1.629
+Node utilization: 81.4%
+
+<font color="blue">Elapsed time: 21.67 secs</font>
+==============================
+Asize: 4
+Nsize: 40
+Items: 100000
+Nodes: 33250
+Average items per node: 3.008
+Node utilization: 75.2%
+
+<font color="blue">Elapsed time: 9.24 secs</font>
+==============================
+Asize: 8
+Nsize: 56
+Items: 100000
+Nodes: 17370
+Average items per node: 5.757
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 4.44 secs</font>
+==============================
+Asize: 16
+Nsize: 88
+Items: 100000
+Nodes: 8856
+Average items per node: 11.29
+Node utilization: 70.6%
+
+<font color="blue">Elapsed time: 2.46 secs</font>
+==============================
+Asize: 32
+Nsize: 152
+Items: 100000
+Nodes: 4410
+Average items per node: 22.68
+Node utilization: 70.9%
+
+<font color="blue">Elapsed time: 1.22 secs</font>
+==============================
+Asize: 64
+Nsize: 280
+Items: 100000
+Nodes: 2220
+Average items per node: 45.05
+Node utilization: 70.4%
+
+<font color="blue">Elapsed time: 0.6 secs</font>
+==============================
+Asize: 128
+Nsize: 536
+Items: 100000
+Nodes: 1085
+Average items per node: 92.17
+Node utilization: 72%
+
+<font color="blue">Elapsed time: 0.3 secs</font>
+==============================
+Asize: 256
+Nsize: 1048
+Items: 100000
+Nodes: 523
+Average items per node: 191.2
+Node utilization: 74.7%
+
+<font color="blue">Elapsed time: 0.16 secs</font>
+==============================
+Asize: 512
+Nsize: 2072
+Items: 100000
+Nodes: 257
+Average items per node: 389.1
+Node utilization: 76%
+
+<font color="blue">Elapsed time: 0.1 secs</font>
+==============================
+Asize: 1024
+Nsize: 4120
+Items: 100000
+Nodes: 128
+Average items per node: 781.2
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.1 secs</font>
+==============================
+Asize: 2048
+Nsize: 8216
+Items: 100000
+Nodes: 64
+Average items per node: 1562
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.15 secs</font>
+==============================
+Asize: 4096
+Nsize: 16408
+Items: 100000
+Nodes: 32
+Average items per node: 3125
+Node utilization: 76.3%
+
+<font color="blue">Elapsed time: 0.27 secs</font>
+==============================
+</pre></blockquote></td>
+
+</tr></table>
+</blockquote>
+
+</ul>
+
+<hr>
+<br><br><br>
+<!--
+<img src="../../../../../images/annew3.gif">
+-->
+
+</body>
+</html>
+
+<blockquote><pre>
+</pre></blockquote>
+
