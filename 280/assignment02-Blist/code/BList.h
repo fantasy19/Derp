@@ -83,14 +83,16 @@ class BList
                 tmp->prev = 0;
                 tmp->next = 0;
                 tail_ = head_ = tmp;
+                return;
             }
             else {
                 tmp->next = head_;
                 head_ = tmp;
-                head_->values[0] = value;
             }
         }
         
+        BNode * left = head_;
+        BNode * right = left + 1;
     };
 
       // arrays will be sorted
