@@ -66,16 +66,40 @@ class BList
     BList& operator=(const BList &rhs) throw(BListException);
 
       // arrays will be unsorted
-    void push_back(const T& value) throw(BListException);
-    void push_front(const T& value) throw(BListException);
+    void push_back(const T& value) throw(BListException){}
+    void push_front(const T& value) throw(BListException) {
+        
+        if (head && head_->count < Size) {
+            for (int i = 0; i < Size - 1; ++i)
+                head_->values[i + 1] = head_->values[i];
+
+            head_->values[0] = value;
+            ++head_->count;
+        }
+        else {
+            BNode * tmp = new BNode();
+            tmp->values[0] = value;
+            if (!head_) { // no head = no tail
+                tmp->prev = 0;
+                tmp->next = 0;
+                tail_ = head_ = tmp;
+            }
+            else {
+                tmp->next = head_;
+                head_ = tmp;
+                head_->values[0] = value;
+            }
+        }
+        
+    };
 
       // arrays will be sorted
-    void insert(const T& value) throw(BListException);
+    void insert(const T& value) throw(BListException) {}
 
-    void remove(int index) throw(BListException);
-    void remove_by_value(const T& value); 
+    void remove(int index) throw(BListException) {}
+    void remove_by_value(const T& value) {}
 
-    int find(const T& value) const;       // returns index, -1 if not found
+    int find(const T& value) const {};       // returns index, -1 if not found
 
     T& operator[](int index) throw(BListException);             // for l-values
     const T& operator[](int index) const throw(BListException); // for r-values
@@ -83,17 +107,18 @@ class BList
     unsigned size(void) const; // total number of items (not nodes)
     void clear(void);          // delete all nodes 
 
-    static unsigned nodesize(void){ return sizeof(*this); }; // so the allocator knows the size
+    static unsigned nodesize(void); // so the allocator knows the size
 
       // For debugging
     const BNode *GetHead() const{ return head_; };
-    BListStats GetStats() const;
+    BListStats GetStats() const { return bls; };
 
   private:
     BNode *head_; // points to the first node
     BNode *tail_; // points to the last node
 
     // Other private methods you may need
+    BListStats bls;
 };
 
 #include "BList.cpp"
