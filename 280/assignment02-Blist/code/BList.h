@@ -59,40 +59,69 @@ class BList
       BNode() : next(0), prev(0), count(0) {}
     };
 
-    BList();                 // default constructor                        
-    BList(const BList &rhs); // copy constructor
+    BList() :head_(0), tail_(0), bls() {};                 // default constructor                        
+    BList(const BList &rhs){ // copy constructor
+        BNode * tmp = rhs.head_, * frontTracker = 0;
+
+        while (tmp) {
+            BNode * makeNode = new BNode();
+            makeNode->count = tmp->count;
+            for (int i = 0; i < count; ++i)
+                makeNode->values[i] = tmp->values[i];
+
+            if (head) {
+                frontTracker->next = makeNode;
+                frontTracker->next->prev = frontTracker;
+                frontTracker = frontTracker->next;
+            }
+            else {
+                head_ = makeNode;
+                head_->prev = 0;
+                frontTracker = head;
+            }
+            
+
+            if (!tmp->next) {
+                tail_ = makeNode;
+                tail_->next = 0;
+            }
+
+            tmp = tmp->next;
+            
+        }
+
+
+
+    }
     ~BList();                // destructor                         
 
-    BList& operator=(const BList &rhs) throw(BListException);
+    BList& operator=(const BList &rhs) throw(BListException) {
+
+    }
 
       // arrays will be unsorted
     void push_back(const T& value) throw(BListException){}
     void push_front(const T& value) throw(BListException) {
         
-        if (head && head_->count < Size) {
-            for (int i = 0; i < Size - 1; ++i)
-                head_->values[i + 1] = head_->values[i];
-
-            head_->values[0] = value;
-            ++head_->count;
-        }
-        else {
-            BNode * tmp = new BNode();
-            tmp->values[0] = value;
-            if (!head_) { // no head = no tail
-                tmp->prev = 0;
-                tmp->next = 0;
-                tail_ = head_ = tmp;
-                return;
-            }
-            else {
-                tmp->next = head_;
-                head_ = tmp;
-            }
-        }
+        if (head && head_->count < Size) 
+            head_->values[head_->count++] = value;
         
-        BNode * left = head_;
-        BNode * right = left + 1;
+        return;
+
+        BNode * tmp = new BNode();
+        tmp->values[0] = value;
+        tmp->next = head_;
+        tmp->prev = 0;
+
+        if (tmp->next) {
+            head->prev = tmp;
+            head = tmp;
+        }
+        else {  // no head = no tail
+            head_ = tmp;
+            tail_ = head_;
+        }
+          
     };
 
       // arrays will be sorted
@@ -101,18 +130,38 @@ class BList
     void remove(int index) throw(BListException) {}
     void remove_by_value(const T& value) {}
 
-    int find(const T& value) const {};       // returns index, -1 if not found
+    int find(const T& value) const {      // returns index, -1 if not found
+    
+        BNode * tmp = head_;
+        while (tmp) {
+            for (int i = 0; i < tmp->count; ++i) {
+                if (tmp->values[i] == value)
+                    return i;
+            }
+            tmp = tmp->next;
+        }
+    }
 
     T& operator[](int index) throw(BListException);             // for l-values
     const T& operator[](int index) const throw(BListException); // for r-values
 
-    unsigned size(void) const; // total number of items (not nodes)
+    unsigned size(void) const {// total number of items (not nodes)
+    
+        BNode * tmp = head_;
+        unsigned tmpNum = 0;
+        while (tmp) {
+            tmpNum += tmp->count;
+            tmp = tmp->next;
+        }
+        return tmpNum;
+    }
+
     void clear(void);          // delete all nodes 
 
     static unsigned nodesize(void); // so the allocator knows the size
 
       // For debugging
-    const BNode *GetHead() const{ return head_; };
+    const BNode *GetHead() const;
     BListStats GetStats() const { return bls; };
 
   private:
