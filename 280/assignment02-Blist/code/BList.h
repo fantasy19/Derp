@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <string>     // error strings
 #include <stdexcept>  // std::exception
-
+#include <iostream>
 #ifdef _MSC_VER
 #pragma warning( disable : 4290 ) // suppress warning: C++ Exception Specification ignored
 #endif
@@ -59,8 +59,9 @@ public:
 		BNode() : next(0), prev(0), count(0) {}
 	};
 
-	BList() :head_(0), tail_(0), bls() {};                 // default constructor                        
+	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0) {};                 // default constructor                        
 	BList(const BList &rhs) { // copy constructor
+		
 		BNode * tmp = rhs.head_, *frontTracker = 0;
 		bls = rhs.bls;
 
@@ -117,47 +118,57 @@ public:
 
 		if (tail_) {
 			if (tail_->count < Size)  // got space
-				tail_->values[++tail_->count] = value;
+				tail_->values[tail_->count++] = value;
 			else {
 				tail_->next = new BNode();
 				tail_->next->count = 1;
 				tail_->next->prev = tail_;
 				tail_->next->next = 0;
+			//	std::cout << value << std::endl;
+				tail_->next->values[0] = value;
+			
+				tail_ = tail_->next;
+				++bls.NodeCount;
 			}
+			++bls.ItemCount;
+			return;
 		}
-		return;
+		
 
 		if (!head_) { // no tail means no head
 			head_ = new BNode();
 			head_->prev =
-				head_->next = 0;
+			head_->next = 0;
 			head_->values[0] = value;
 			head_->count = 1;
+			tail_ = head_;
+			++bls.ItemCount;
+			++bls.NodeCount;
 		}
 
 	}
 
 	void push_front(const T& value) throw(BListException) {
-
+		
 		if (head_ && head_->count < Size) { // got space
-			for (int i = head_->count;i != -1;--i)
+			for (int i = head_->count; i != -1; --i)
 				head_->values[i + 1] = head_->values[i];
 
 			head_->values[0] = value;
-
-
-			head_->values[head_->count++] = value;
+			++head_->count;
+			++bls.ItemCount;
+			return;
 		}
-
-		return;
 
 		// no space or empty list
 		if (!head_) {
 			head_ = new BNode();
 			head_->prev =
-				head_->next = 0;
+			head_->next = 0;
 			head_->values[0] = value;
 			head_->count = 1;
+			tail_ = head_;
+			++bls.NodeCount;
 		}
 		else {
 			BNode * tmp = new BNode();
@@ -165,108 +176,101 @@ public:
 			tmp->count = 1;
 			tmp->next = head_;
 			head_ = tmp;
+			++bls.NodeCount;
 		}
+
+		++bls.ItemCount;
 	};
+
 
 	// arrays will be sorted
 	void insert(const T& value) throw(BListException) {
+		
+		BNode * tmp = head_;
 
-		BNode * tmp = head_, *tmp2 = 0;
-
-		if (!tmp)
+		if (!head_) {
 			push_front(value);
+			return;
+		}
 
-		return;
+		
+		while (tmp) { // find fitting note
+			if (tmp->values[0] < value && tmp->next->values[0] > value) 
+				break;
 
-		while (tmp) { // slot first
-			for (unsigned i = 0; i < tmp->count;++i) {
+			tmp = tmp->next;
+		}
+		
+		if (tmp->count < Size) { // got space
+			T num; 
+			int i = 0, j = Size - 1;
+
+			for (; i < Size;++i) {
+				if (i != 0)	
+					num = tmp->values[i - 1];
 				if (tmp->values[i] > value) {
-					if (tmp->count < Size) {
-						tmp->values[count++] = value;
-						tmp2 = tmp;
-						tmp = tail_;
-						break;
-					}
-					else {
-						if (tmp == head_) {
-							push_front(value);
-							tmp2 = head_;
-						}
-						else
-							if (tmp == tail_) {
-								push_back(value);
-								tmp2 = tail_;
-							}
-
-							else {
-								BNode * tmp3 = tmp->next;
-								tmp->next = new BNode();
-								tmp2 = tmp->next;
-								tmp->next->next = tmp3;
-								tmp->next->prev = tmp;
-								tmp->next->count = 1;
-								tmp->next->value[0] = value;
-							}
-					}
-
-
+					tmp->values[i - 1] = value;
+					break;
 				}
 			}
-		}
-		//then arrange
-		if (tmp2 != head_ && tmp2 != tail_) {
 
-		}
-		else {
-			if (tmp2 == head_) {
-				// sort 1st and 2nd node
-				bool insert = false;
-				int i = 0;// count starts at 1 by now
-				while (tmp2->count != Size / 2) {
-
-					if (insert) {
-						if (value > tmp2->next->values[i]) {
-							tmp2->values[i] = tmp2->next->values[i++];
-							++tmp2->count;
-						}
-						else {
-							tmp2->values[count] = value;
-							++i;
-							insert = true;
-						}
-					}
-					else {
-						tmp2->values[i] = tmp2->next->values[i++];
-						++tmp2->count;
-					}
+			for (;j != (i - 1);--j) 
+				tmp->values[j] = tmp->values[j - 1];
 				
-				}
-				i = tmp2->next->count - tmp2->count;
-				int j = 0;
-				while (j != i) {
-					tmp2->next->values[j] = tmp2->next->values[j + 1];
-					--tmp2->next->count;
-					++j;
+			tmp->values[j] = num;
+		}
+		else { // full at this point of time
+			++bls.NodeCount;
+			int i = 0;
+
+			for (; i < Size;++i) {
+				if (tmp->values[i] > value) {
+					--i;
+					break;
 				}
 			}
 
-			}
-
-			if (tmp2 == tail_) {
-				// sort tail and 2nd last node
-				int tmpNum = (tmp2->prev->count / 2);
-				for (int i = 0; i < tmpNum;++i) {
-					push_back(tmp2->prev->values[i]);
-					--tmp2->prev->count;
-					++tmp2->count;
+			if (i < (Size / 2)) {
+				BNode * tmp2 = new BNode();
+				tmp2->next = tmp;
+				tmp2->prev = tmp->prev;
+				for (int k = 0; k < i; ++k) {
+					tmp2->values[k] = tmp2->next->values[k];
+					//tmp2->next->values[k] = tmp2->next->values[k + 1];
 				}
-				// then sort
 
+				tmp2->next->count -= i+1;
+				tmp2->count += i+1;
+				tmp2->values[i] = value;
+				tmp->prev = tmp2;
+				tmp2->prev->next = tmp2;
 			}
+			else {
+				BNode * tmp3 = new BNode();
+				tmp3->prev = tmp;
+				tmp3->next = tmp->next;
+				tmp3->values[0] = value;
+				for (int k = i, l = 1; k < Size; ++k, ++l) {
+					tmp3->values[l] = tmp3->prev->values[k];
+					//tmp3->prev->values[k] = 0;
+				}
+				
+				tmp3->prev->count -= i + 1;
+				tmp3->count += i + 1;
+				tmp3->next = tmp->next->next;
+				tmp->next = tmp3;
+			}
+
+
 		}
 
+		++bls.ItemCount;
 
+		
 	}
+
+
+	
 
     void remove(int index) throw(BListException) {}
     void remove_by_value(const T& value) {}
@@ -285,8 +289,23 @@ public:
 		return -1;
     }
 
-	T& operator[](int index) throw(BListException) { T tmp; return tmp; }             // for l-values
-	const T& operator[](int index) const throw(BListException) { T tmp; return tmp; }; // for r-values
+	T& operator[](int index) throw(BListException) { 
+		return *const_cast<T*>(&this->operator[](index));
+	}
+	// for l-values
+	const T& operator[](int index) const throw(BListException) { 
+		
+		BNode * tmp = head_;
+		T num;
+		while (tmp && index) {
+			for (int i = 0; i < tmp->count; ++i) {
+				num = tmp->values[i];
+				--index;
+			}
+			tmp->index;
+		}
+		return num;
+	}; // for r-values
 
     unsigned size(void) const {// total number of items (not nodes)
     

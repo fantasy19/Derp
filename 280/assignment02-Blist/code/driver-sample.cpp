@@ -100,6 +100,7 @@ void test1_1()
   std::cout << "==================== test1_1 ====================\n";
   const unsigned asize = 1;
 
+
   BList<int, asize> bl;
   std::cout << "nodesize is " << bl.nodesize() << std::endl;
   for (int i = 1; i <= 16; i++)
