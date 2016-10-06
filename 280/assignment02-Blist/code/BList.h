@@ -193,9 +193,10 @@ public:
 			return;
 		}
 
+
 		
-		while (tmp) { // find fitting note
-			if (tmp->values[0] < value && tmp->next->values[0] > value) 
+		while (tmp->next) { // find fitting note
+			if (compare(tmp->values[0], value) && !compare(tmp->next->values[0], value))
 				break;
 
 			tmp = tmp->next;
@@ -208,7 +209,7 @@ public:
 			for (; i < Size;++i) {
 				if (i != 0)	
 					num = tmp->values[i - 1];
-				if (tmp->values[i] > value) {
+				if (!compare(tmp->values[i], value)) {
 					tmp->values[i - 1] = value;
 					break;
 				}
@@ -224,7 +225,7 @@ public:
 			int i = 0;
 
 			for (; i < Size;++i) {
-				if (tmp->values[i] > value) {
+				if (!compare(tmp->values[i], value)) {
 					--i;
 					break;
 				}
@@ -243,7 +244,8 @@ public:
 				tmp2->count += i+1;
 				tmp2->values[i] = value;
 				tmp->prev = tmp2;
-				tmp2->prev->next = tmp2;
+				if (tmp->prev)
+					tmp2->prev->next = tmp2;
 			}
 			else {
 				BNode * tmp3 = new BNode();
@@ -257,7 +259,8 @@ public:
 				
 				tmp3->prev->count -= i + 1;
 				tmp3->count += i + 1;
-				tmp3->next = tmp->next->next;
+				if (tmp->next)
+					tmp3->next = tmp->next->next;
 				tmp->next = tmp3;
 			}
 
@@ -302,7 +305,7 @@ public:
 				num = tmp->values[i];
 				--index;
 			}
-			tmp->index;
+			tmp = tmp->next;
 		}
 		return num;
 	}; // for r-values
@@ -332,7 +335,10 @@ public:
 
     // Other private methods you may need
     BListStats bls;
+
+	bool compare(T t, T t2) { return (t < t2); }
 };
+
 
 #include "BList.cpp"
 

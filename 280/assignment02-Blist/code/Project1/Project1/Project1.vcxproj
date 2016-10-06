@@ -64,15 +64,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\BList.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\driver-sample.cpp" />
-    <ClCompile Include="..\..\PRNG.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\BList.h" />
     <ClInclude Include="..\..\PRNG.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\driver-sample.cpp" />
+    <ClCompile Include="..\..\PRNG.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
