@@ -192,84 +192,142 @@ public:
 			push_front(value);
 			return;
 		}
-
-
 		
-		while (tmp->next) { // find fitting note
-			if (compare(tmp->values[0], value) && !compare(tmp->next->values[0], value))
-				break;
+		while (tmp) { // find fitting note
+            if (!compare(tmp->values[0], value)) {
+                tmp = tmp->prev;
+                break;
+            }
 
 			tmp = tmp->next;
 		}
 		
-		if (tmp->count < Size) { // got space
-			T num; 
-			int i = 0, j = Size - 1;
+        if (value < head_->values[0])
+            tmp = head_;
 
-			for (; i < Size;++i) {
-				if (i != 0)	
-					num = tmp->values[i - 1];
-				if (!compare(tmp->values[i], value)) {
-					tmp->values[i - 1] = value;
-					break;
-				}
-			}
+        if (!tmp)
+            tmp = tail_;
 
-			for (;j != (i - 1);--j) 
-				tmp->values[j] = tmp->values[j - 1];
-				
-			tmp->values[j] = num;
+        if (tmp->count < Size) { // got space
+
+            int i = 0, j = tmp->count;
+
+		    for (; i < tmp->count;++i) {
+			    if (!compare(tmp->values[i], value))
+				    break;
+		    }
+            
+            for (; j > i; --j)
+                 tmp->values[j] = tmp->values[j - 1];
+
+			tmp->values[i] = value;
+            ++tmp->count;
 		}
 		else { // full at this point of time
-			++bls.NodeCount;
-			int i = 0;
+			
+            BNode* tmp2 = new BNode();
+            int i = 0;
 
-			for (; i < Size;++i) {
-				if (!compare(tmp->values[i], value)) {
-					--i;
-					break;
-				}
-			}
+            for (; i < tmp->count; ++i) {
+                if (!compare(tmp->values[i], value))
+                    break;
+            }
 
 			if (i < (Size / 2)) {
-				BNode * tmp2 = new BNode();
 				tmp2->next = tmp;
 				tmp2->prev = tmp->prev;
-				for (int k = 0; k < i; ++k) {
-					tmp2->values[k] = tmp2->next->values[k];
-					//tmp2->next->values[k] = tmp2->next->values[k + 1];
+
+                if (!tmp2->prev)
+                    head_ = tmp2;
+
+                for (int k = 0; k < i; ++k) {
+                    
+                    tmp2->values[k] = tmp2->next->values[k];
+                    ++tmp2->count;
+                    tmp->values[k] = tmp->values[k + 1];
+                    
 				}
 
-				tmp2->next->count -= i+1;
-				tmp2->count += i+1;
-				tmp2->values[i] = value;
+                tmp2->values[i] = value;
+
+                for (int k = ++i; k < tmp->count; ++k) {
+                    tmp2->values[k] = tmp2->next->values[k-1];
+                    ++tmp2->count;
+                }
+
+                tmp->count -= Size/2;
 				tmp->prev = tmp2;
-				if (tmp->prev)
+				if (tmp2 != head_)
 					tmp2->prev->next = tmp2;
+
 			}
 			else {
-				BNode * tmp3 = new BNode();
-				tmp3->prev = tmp;
-				tmp3->next = tmp->next;
-				tmp3->values[0] = value;
-				for (int k = i, l = 1; k < Size; ++k, ++l) {
-					tmp3->values[l] = tmp3->prev->values[k];
-					//tmp3->prev->values[k] = 0;
-				}
+				tmp2->prev = tmp;
+				tmp2->next = tmp->next;
+                
+                if (!tmp2->next)
+                    tail_ = tmp2;
+
+                if (Size != 1) {
+                  
+                    for (int k = (Size/2), l = 0; k < tmp->count; ++k, ++l) {
+                        tmp2->values[l] = tmp2->prev->values[k];
+                        ++tmp2->count;
+                        --tmp->count;
+                    }
+
+                    if (!compare(tmp2->values[0], value)) {
+                        tmp->values[(Size / 2)] = value;
+                        ++tmp->count;
+                    }
+                    else {
+                        T num{};
+                        for (int m = 0, l = 0; m < tmp->count; ++m) {
+                            if (l) {
+                                T num2 = tmp2->values[m];
+                                tmp2->values[m] = num;
+                                num = num2;
+                                
+                            }
+                            else {
+                                if (value < tmp2->values[m]) {
+                                    num = tmp2->values[m];
+                                    l = 1;
+                                }
+                            }
+                        }
+                        tmp2->values[tmp->count++] = num;
+                    }
+                    
+                }
+                else {
+                    tmp2->count = 1;
+                    
+                    if (tmp2->prev && !compare(tmp2->prev->values[0] , value )) {
+                        tmp2->values[0] = tmp2->prev->values[0];
+                        tmp2->prev->values[0] = value;
+                    }else
+                        tmp2->values[0] = value;
+
+                }
+
+				if (tmp2 != tail_)
+					tmp2->next->prev = tmp2;
 				
-				tmp3->prev->count -= i + 1;
-				tmp3->count += i + 1;
-				if (tmp->next)
-					tmp3->next = tmp->next->next;
-				tmp->next = tmp3;
+                tmp->next = tmp2;
 			}
 
-
+            ++bls.NodeCount;
 		}
 
 		++bls.ItemCount;
 
-		
+      //  BNode * tt = head_;
+      //  while (tt) {
+      //      std::cout << tt->values[0] <<  " ";
+      //      tt = tt->next;
+      //  }
+      //  std::cout << std::endl;
 	}
 
 
@@ -299,7 +357,7 @@ public:
 	const T& operator[](int index) const throw(BListException) { 
 		
 		BNode * tmp = head_;
-		T num;
+        T num{};
 		while (tmp && index) {
 			for (int i = 0; i < tmp->count; ++i) {
 				num = tmp->values[i];

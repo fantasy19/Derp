@@ -313,6 +313,7 @@ void test3_1()
   for (unsigned i = 0; i < size; i++) 
   {
     bl.insert(ia[i]);
+    std::cout << ia[i] << std::endl;
     //DumpList(bl, true);
     //DumpList(bl);
     //std::cout << "==========================\n";
