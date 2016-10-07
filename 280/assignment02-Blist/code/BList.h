@@ -213,8 +213,10 @@ public:
             int i = 0, j = tmp->count;
 
 		    for (; i < tmp->count;++i) {
-			    if (!compare(tmp->values[i], value))
-				    break;
+				if (!compare(tmp->values[i], value)) {
+					
+					break;
+				}
 		    }
             
             for (; j > i; --j)
@@ -233,101 +235,61 @@ public:
                     break;
             }
 
-			if (i < (Size / 2)) {
+			if (Size != 1) {
 				tmp2->next = tmp;
 				tmp2->prev = tmp->prev;
+                
+				if (!tmp2->prev)
+					head_ = tmp2;
 
-                if (!tmp2->prev)
-                    head_ = tmp2;
-
-                for (int k = 0; k < i; ++k) {
-                    
-                    tmp2->values[k] = tmp2->next->values[k];
-                    ++tmp2->count;
-                    tmp->values[k] = tmp->values[k + 1];
-                    
+			
+				sort(tmp->count, tmp->values, tmp2->values, value, (i <= Size / 2));
+				if (i <= Size / 2) {
+					tmp2->count = Size / 2 + 1;
+					tmp->count = Size / 2;
+				}
+				else {
+					tmp2->count = Size / 2;
+					tmp->count = Size / 2 + 1;
 				}
 
-                tmp2->values[i] = value;
-
-                for (int k = ++i; k < tmp->count; ++k) {
-                    tmp2->values[k] = tmp2->next->values[k-1];
-                    ++tmp2->count;
-                }
-
-                tmp->count -= Size/2;
-				tmp->prev = tmp2;
-				if (tmp2 != head_)
-					tmp2->prev->next = tmp2;
-
 			}
-			else {
-				tmp2->prev = tmp;
-				tmp2->next = tmp->next;
-                
-                if (!tmp2->next)
-                    tail_ = tmp2;
-
-                if (Size != 1) {
-                  
-                    for (int k = (Size/2), l = 0; k < tmp->count; ++k, ++l) {
-                        tmp2->values[l] = tmp2->prev->values[k];
-                        ++tmp2->count;
-                        --tmp->count;
-                    }
-
-                    if (!compare(tmp2->values[0], value)) {
-                        tmp->values[(Size / 2)] = value;
-                        ++tmp->count;
-                    }
-                    else {
-                        T num{};
-                        for (int m = 0, l = 0; m < tmp->count; ++m) {
-                            if (l) {
-                                T num2 = tmp2->values[m];
-                                tmp2->values[m] = num;
-                                num = num2;
-                                
-                            }
-                            else {
-                                if (value < tmp2->values[m]) {
-                                    num = tmp2->values[m];
-                                    l = 1;
-                                }
-                            }
-                        }
-                        tmp2->values[tmp->count++] = num;
-                    }
-                    
-                }
-                else {
-                    tmp2->count = 1;
-                    
-                    if (tmp2->prev && !compare(tmp2->prev->values[0] , value )) {
-                        tmp2->values[0] = tmp2->prev->values[0];
-                        tmp2->prev->values[0] = value;
-                    }else
-                        tmp2->values[0] = value;
-
-                }
-
-				if (tmp2 != tail_)
-					tmp2->next->prev = tmp2;
+			else{
+                tmp2->count = 1;
+				BNode * tmpNode = 
 				
-                tmp->next = tmp2;
-			}
+				if (tmpNode->values[0] < value) { // settling parts of wiring later so....
+					tmp2->values[0] = tmpNode->values[0];
+					tmpNode->values[0] = value;
+					tmpNode = tmpNode->next;
+				}
+
+				while (tmpNode) {
+
+					if (tmpNode->values[0] < value )
+						tmpNode->prev->values[0] = tmpNode->values[0];
+
+					if (!tmpNode->next) // largest value
+						tmpNode->values[0] = value;
+
+					tmpNode = tmpNode->next;
+				}
+
+            }
+
+			if (tmp2 != head_)
+				tmp2->prev->next = tmp2;
+				
+            tmp->prev = tmp2;
+			
+			if (!tmp->next)
+				tail_ = tmp;
 
             ++bls.NodeCount;
 		}
 
 		++bls.ItemCount;
 
-      //  BNode * tt = head_;
-      //  while (tt) {
-      //      std::cout << tt->values[0] <<  " ";
-      //      tt = tt->next;
-      //  }
-      //  std::cout << std::endl;
 	}
 
 
@@ -395,6 +357,45 @@ public:
     BListStats bls;
 
 	bool compare(T t, T t2) { return (t < t2); }
+
+	void sort(int count, T * arr1, T * arr2, T input, bool left) {
+		T  oneArray[Size+1] ;
+		int j = -1;
+
+		for (int i = 0; i < Size + 1; ++i) {
+
+			if (!compare(input, arr1[i]) && i < count)
+				oneArray[i] = arr1[i];
+			else {
+				if (j == -1) j = i;
+				if (i < count)
+					oneArray[i + 1] = arr1[i];
+			}
+			
+		}
+
+		oneArray[j] = input;
+		
+		if (left) {
+			for (int i = 0;i < Size/2+1;++i)
+				arr2[i] = oneArray[i];
+
+			for (int i = Size/2+1, l = 0;i < Size + 1;++i, ++l)
+				arr1[l] = oneArray[i];
+		}
+		else {
+			for (int i = 0;i < Size/2;++i)
+				arr2[i] = oneArray[i];
+
+			for (int i = Size / 2, m = 0;i < Size + 1;++i,++m) 
+				arr1[m] = oneArray[i];
+		}
+		
+
+		for (int i = 0; i < Size;++i)
+			std::cout << arr1[i] << " " << arr2[i] << std::endl;;
+		
+	}
 };
 
 
