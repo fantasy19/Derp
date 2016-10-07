@@ -228,21 +228,21 @@ public:
 		else { // full at this point of time
 			
             BNode* tmp2 = new BNode();
-            int i = 0;
 
-            for (; i < tmp->count; ++i) {
-                if (!compare(tmp->values[i], value))
-                    break;
-            }
+            if (Size != 1) {
+                int i = 0;
 
-			if (Size != 1) {
+                for (; i < tmp->count; ++i) {
+                    if (!compare(tmp->values[i], value))
+                        break;
+                }
+
 				tmp2->next = tmp;
 				tmp2->prev = tmp->prev;
                 
 				if (!tmp2->prev)
 					head_ = tmp2;
 
-			
 				sort(tmp->count, tmp->values, tmp2->values, value, (i <= Size / 2));
 				if (i <= Size / 2) {
 					tmp2->count = Size / 2 + 1;
@@ -253,37 +253,49 @@ public:
 					tmp->count = Size / 2 + 1;
 				}
 
+                if (tmp2 != head_)
+                    tmp2->prev->next = tmp2;
+
+                tmp->prev = tmp2;
+
+                if (!tmp->next)
+                    tail_ = tmp;
 			}
 			else{
                 tmp2->count = 1;
-				BNode * tmpNode = 
-				
-				if (tmpNode->values[0] < value) { // settling parts of wiring later so....
-					tmp2->values[0] = tmpNode->values[0];
-					tmpNode->values[0] = value;
-					tmpNode = tmpNode->next;
-				}
+                tmp2->next = tmp->next;
+                if (tmp2->next)
+                    tmp2->next->prev = tmp2;
+                tmp2->prev = tmp;
+                tmp->next = tmp2;
+                
+                BNode *tmpNode = head_;
 
-				while (tmpNode) {
+                while (tmpNode) {
+                    if (value < tmpNode->values[0]) {
+                        if (tmpNode != head_) {
+                            tmpNode = tmpNode->prev;
+                            tmpNode->values[0] = value;
+                        }
+                        else {
+                            tmpNode->next->values[0] = tmpNode->values[0];
+                            tmpNode->values[0] = value;
+                        }
+                        break;
+                    }
+                    
 
-					if (tmpNode->values[0] < value )
-						tmpNode->prev->values[0] = tmpNode->values[0];
+                    if (!tmpNode->next)
+                        tmpNode->values[0] = value;
 
-					if (!tmpNode->next) // largest value
-						tmpNode->values[0] = value;
+                    tmpNode = tmpNode->next;
+                }
+                
 
-					tmpNode = tmpNode->next;
-				}
-
+                if (!tmp2->next)
+                    tail_ = tmp2;
+                
             }
-
-			if (tmp2 != head_)
-				tmp2->prev->next = tmp2;
-				
-            tmp->prev = tmp2;
-			
-			if (!tmp->next)
-				tail_ = tmp;
 
             ++bls.NodeCount;
 		}
@@ -320,7 +332,7 @@ public:
 		
 		BNode * tmp = head_;
         T num{};
-		while (tmp && index) {
+		while (tmp && index!=-1) {
 			for (int i = 0; i < tmp->count; ++i) {
 				num = tmp->values[i];
 				--index;
