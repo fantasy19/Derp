@@ -55,7 +55,7 @@ public:
 		BNode *next;
 		BNode *prev;
 		unsigned count; // number of items currently in the node
-        T values[Size];
+        T values[Size]{ 0 };
         BNode() : next(0), prev(0), count(0) {}
 	};
 
@@ -171,7 +171,7 @@ public:
 	void push_front(const T& value) throw(BListException) {
 		
 		if (head_ && head_->count < Size) { // got space
-			for (int i = head_->count; i != -1; --i)
+			for (int i = head_->count-1; i != -1; --i)
 				head_->values[i + 1] = head_->values[i];
 
 			head_->values[0] = value;
@@ -189,7 +189,7 @@ public:
 			head_->count = 1;
 			tail_ = head_;
 			++bls.NodeCount;
-		}
+        }
 		else {
 			BNode * tmp = new BNode();
 			tmp->values[0] = value;
@@ -390,10 +390,8 @@ public:
 
     int find(const T& value) const {      // returns index, -1 if not found
         if (insert_){
-            T num = value;
-            int found = Bsearch(value);
           //  std::cout << value << " is " << this->operator[](found) << std::endl;
-            return found;
+            return Bsearch(value);
         }
         else {
             int rtnVal = 0;
@@ -475,12 +473,12 @@ public:
     bool insert_;
 	bool compare(T t, T t2) { return (t < t2); }
 
-	void sort(int count, T * arr1, T * arr2, T input, bool left) {
+	void sort(unsigned count, T * arr1, T * arr2, T input, bool left) {
       
 		T  oneArray[Size+1] ;
 		int j = -1;
 
-		for (int i = 0; i < Size + 1; ++i) {
+		for (unsigned i = 0; i < Size + 1; ++i) {
 
 			if (!compare(input, arr1[i]) && i < count)
 				oneArray[i] = arr1[i];
@@ -495,17 +493,17 @@ public:
 		oneArray[j] = input;
 		
 		if (left) {
-			for (int i = 0;i < Size/2+1;++i)
+			for (unsigned i = 0;i < Size/2+1;++i)
 				arr2[i] = oneArray[i];
 
-			for (int i = Size/2+1, l = 0;i < Size + 1;++i, ++l)
+			for (unsigned i = Size/2+1, l = 0;i < Size + 1;++i, ++l)
 				arr1[l] = oneArray[i];
 		}
 		else {
-			for (int i = 0;i < Size/2;++i)
+			for (unsigned i = 0;i < Size/2;++i)
 				arr2[i] = oneArray[i];
 
-			for (int i = Size / 2, m = 0;i < Size + 1;++i,++m) 
+			for (unsigned i = Size / 2, m = 0;i < Size + 1;++i,++m) 
 				arr1[m] = oneArray[i];
 		}
 		
