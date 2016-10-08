@@ -11,7 +11,7 @@
 
 class BListException : public std::exception
 {
-  private:  
+  private:
     int m_ErrCode;
     std::string m_Description;
 
@@ -19,8 +19,8 @@ class BListException : public std::exception
     BListException(int ErrCode, const std::string& Description) :
     m_ErrCode(ErrCode), m_Description(Description) {};
 
-    virtual int code(void) const { 
-      return m_ErrCode; 
+    virtual int code(void) const {
+      return m_ErrCode;
     }
 
     virtual const char *what(void) const throw() {
@@ -37,14 +37,14 @@ struct BListStats
 {
 
   BListStats() : NodeSize(0), NodeCount(0), ArraySize(0), ItemCount(0)  {};
-  BListStats(size_t nsize, size_t ncount, size_t asize, unsigned count) : 
+  BListStats(size_t nsize, size_t ncount, size_t asize, unsigned count) :
      NodeSize(nsize), NodeCount(ncount), ArraySize(asize), ItemCount(count)  {};
 
   size_t NodeSize;    // Size of a node
   size_t NodeCount;   // Number of nodes in the list
   size_t ArraySize;   // Max number of items in each node
   unsigned ItemCount; // Number of items in the entire list
-};  
+};
 
 template <typename T, unsigned Size = 1>
 class BList
@@ -55,13 +55,13 @@ public:
 		BNode *next;
 		BNode *prev;
 		unsigned count; // number of items currently in the node
-        T values[Size]{ 0 };
-        BNode() : next(0), prev(0), count(0) {}
+        T values[Size];
+        BNode() : next(0), prev(0), count(0), values{} {}
 	};
 
-	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0), insert_(false) {};                 // default constructor                        
+	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0), insert_(false) {};                 // default constructor
 	BList(const BList &rhs) { // copy constructor
-		
+
 		BNode * tmp = rhs.head_, *frontTracker = 0;
 		bls = rhs.bls;
 
@@ -94,7 +94,7 @@ public:
 
 
 	}
-	~BList() {                // destructor                         
+	~BList() {                // destructor
         clear();
 	}
 
@@ -146,14 +146,14 @@ public:
 				tail_->next->next = 0;
 			//	std::cout << value << std::endl;
 				tail_->next->values[0] = value;
-			
+
 				tail_ = tail_->next;
 				++bls.NodeCount;
 			}
 			++bls.ItemCount;
 			return;
 		}
-		
+
 
 		if (!head_) { // no tail means no head
 			head_ = new BNode();
@@ -169,7 +169,7 @@ public:
 	}
 
 	void push_front(const T& value) throw(BListException) {
-		
+
 		if (head_ && head_->count < Size) { // got space
 			for (int i = head_->count-1; i != -1; --i)
 				head_->values[i + 1] = head_->values[i];
@@ -213,7 +213,7 @@ public:
 			push_front(value);
 			return;
 		}
-		
+
 		while (tmp) { // find fitting note
             if (!compare(tmp->values[0], value)) {
                 tmp = tmp->prev;
@@ -222,7 +222,7 @@ public:
 
 			tmp = tmp->next;
 		}
-		
+
         if (value < head_->values[0])
             tmp = head_;
 
@@ -235,11 +235,11 @@ public:
 
 		    for (; i < tmp->count;++i) {
 				if (!compare(tmp->values[i], value)) {
-					
+
 					break;
 				}
 		    }
-            
+
             for (; j > i; --j)
                  tmp->values[j] = tmp->values[j - 1];
 
@@ -247,7 +247,7 @@ public:
             ++tmp->count;
 		}
 		else { // full at this point of time
-			
+
             BNode* tmp2 = new BNode();
 
             if (Size != 1) {
@@ -260,20 +260,20 @@ public:
 
                 if (i == tmp->count && tmp->next && tmp->next->count < Size) {
                     delete tmp2;
-                    for (int i = tmp->next->count; i > 0; --i) 
+                    for (int i = tmp->next->count; i > 0; --i)
                         tmp->next->values[i] = tmp->next->values[i - 1];
-                    
+
                     tmp->next->values[0] = value;
                     ++tmp->next->count;
                     ++bls.ItemCount;
                     return;
                 }
 
-                
+
 
 				tmp2->next = tmp;
 				tmp2->prev = tmp->prev;
-                
+
 				if (!tmp2->prev)
 					head_ = tmp2;
 
@@ -302,7 +302,7 @@ public:
                     tmp2->next->prev = tmp2;
                 tmp2->prev = tmp;
                 tmp->next = tmp2;
-                
+
                 BNode *tmpNode = head_;
 
                 while (tmpNode) {
@@ -317,18 +317,18 @@ public:
                         }
                         break;
                     }
-                    
+
 
                     if (!tmpNode->next)
                         tmpNode->values[0] = value;
 
                     tmpNode = tmpNode->next;
                 }
-                
+
 
                 if (!tmp2->next)
                     tail_ = tmp2;
-                
+
             }
 
             ++bls.NodeCount;
@@ -350,7 +350,7 @@ public:
                     match = true;
                     break;
                 }
-                
+
             }
             if (match)
                 break;
@@ -362,7 +362,7 @@ public:
                 BNode * me = tmp;
                 if (tmp->prev)
                     tmp->prev->next = tmp->next;
-              
+
                 if (tmp->next)
                     tmp->next->prev = tmp->prev;
 
@@ -422,10 +422,10 @@ public:
 
         return *num;
     }
-	
+
 	// for l-values
-	const T& operator[](int index) const throw(BListException) { 
-		
+	const T& operator[](int index) const throw(BListException) {
+
         BNode * tmp = head_;
         T * num = 0;
         while (tmp && index != -1) {
@@ -438,10 +438,10 @@ public:
         return *num;
 	}; // for r-values
 
-    
+
 
     unsigned size(void) const {// total number of items (not nodes)
-    
+
         return bls.ItemCount;
     }
 
@@ -456,7 +456,7 @@ public:
         tail_ = NULL;
         bls.ItemCount = 0;
         bls.NodeCount = 0;
-    };          // delete all nodes 
+    };          // delete all nodes
 
     static unsigned nodesize(void); // so the allocator knows the size
 
@@ -474,7 +474,7 @@ public:
 	bool compare(T t, T t2) { return (t < t2); }
 
 	void sort(unsigned count, T * arr1, T * arr2, T input, bool left) {
-      
+
 		T  oneArray[Size+1] ;
 		int j = -1;
 
@@ -487,11 +487,11 @@ public:
 				if (i < count)
 					oneArray[i + 1] = arr1[i];
 			}
-			
+
 		}
 
 		oneArray[j] = input;
-		
+
 		if (left) {
 			for (unsigned i = 0;i < Size/2+1;++i)
 				arr2[i] = oneArray[i];
@@ -503,10 +503,10 @@ public:
 			for (unsigned i = 0;i < Size/2;++i)
 				arr2[i] = oneArray[i];
 
-			for (unsigned i = Size / 2, m = 0;i < Size + 1;++i,++m) 
+			for (unsigned i = Size / 2, m = 0;i < Size + 1;++i,++m)
 				arr1[m] = oneArray[i];
 		}
-		
+
         /*
         for (int i = 0; i < Size; ++i)
             std::cout << arr1[i] << " ";
@@ -517,13 +517,13 @@ public:
 
     std::cout << std::endl;
         */
-		
+
 	}
 
     int Bsearch(T input) const{
-        if (bls.ItemCount <= 1) 
+        if (bls.ItemCount <= 1)
             return 1;
-        
+
         int left = 0, right = bls.ItemCount - 1;
         while (right >= left) {
             int middle = left + (right - left) / 2;
@@ -531,7 +531,7 @@ public:
                // std::cout << this->operator[](middle) << std::endl;
                 return middle;
             }
-            
+
             if (input < this->operator[](middle))
                 right = middle - 1;
             else
