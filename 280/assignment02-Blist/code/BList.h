@@ -55,8 +55,8 @@ public:
 		BNode *next;
 		BNode *prev;
 		unsigned count; // number of items currently in the node
-		T values[Size];
-		BNode() : next(0), prev(0), count(0) {}
+        T values[Size];
+        BNode() : next(0), prev(0), count(0) {}
 	};
 
 	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0), insert_(false) {};                 // default constructor                        
@@ -243,8 +243,8 @@ public:
 				if (!tmp2->prev)
 					head_ = tmp2;
 
-				sort(tmp->count, tmp->values, tmp2->values, value, (i <= Size / 2));
-				if (i <= Size / 2) {
+				sort(tmp->count, tmp->values, tmp2->values, value, (i <= tmp->count / 2));
+				if (i <= tmp->count / 2) {
 					tmp2->count = Size / 2 + 1;
 					tmp->count = Size / 2;
 				}
@@ -304,7 +304,37 @@ public:
 
 	}
 
-    void remove(int index) throw(BListException) {}
+    void remove(int index) throw(BListException) {
+        BNode * tmp = head_; 
+        int j = 0;
+        while (tmp) {
+            bool break_ false;
+            for (int i = 0; i < tmp->count; ++i) {
+                if (tmp->values[i] == this->operator=[](index)) {
+                    j = i;
+                    break_ = true;
+                    break;
+                }
+            }
+
+            if (break_)
+                break;
+
+            tmp = tmp->next;
+        }
+
+        if (tmp) {
+            if (tmp->count == 1) {
+
+            }
+            else {
+                for (int i = j; i > tmp->count - 1; ++i) {
+                    tmp->values[i] = tmp->values[i + 1];
+                }
+                --tmp->count;
+            }
+        }
+    }
     void remove_by_value(const T& value) {}
 
     int find(const T& value) const {      // returns index, -1 if not found
@@ -384,6 +414,7 @@ public:
 	bool compare(T t, T t2) { return (t < t2); }
 
 	void sort(int count, T * arr1, T * arr2, T input, bool left) {
+      
 		T  oneArray[Size+1] ;
 		int j = -1;
 
@@ -416,9 +447,16 @@ public:
 				arr1[m] = oneArray[i];
 		}
 		
+        /*
+        for (int i = 0; i < Size; ++i)
+            std::cout << arr1[i] << " ";
 
-	//	for (int i = 0; i < Size;++i)
-	//		std::cout << arr1[i] << " " << arr2[i] << std::endl;;
+    std::cout << std::endl;
+    for (int i = 0; i < Size; ++i)
+        std::cout << arr2[i] << " ";
+
+    std::cout << std::endl;
+        */
 		
 	}
 
