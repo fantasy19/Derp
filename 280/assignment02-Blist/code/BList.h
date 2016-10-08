@@ -195,6 +195,7 @@ public:
 			tmp->values[0] = value;
 			tmp->count = 1;
 			tmp->next = head_;
+            head_->prev = tmp;
 			head_ = tmp;
 			++bls.NodeCount;
 		}
