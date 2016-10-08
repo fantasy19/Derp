@@ -68,7 +68,7 @@ public:
 		while (tmp) {
 			BNode * makeNode = new BNode();
 			makeNode->count = tmp->count;
-			for (int i = 0; i < makeNode->count; ++i)
+			for (unsigned i = 0; i < makeNode->count; ++i)
 				makeNode->values[i] = tmp->values[i];
 
 			if (head_) {
@@ -95,22 +95,42 @@ public:
 
 	}
 	~BList() {                // destructor                         
-		while (head_) {
-			BNode * tmpN = head_;
-			head_ = head_->next;
-			delete tmpN;
-		}
+        clear();
 	}
 
 	BList& operator=(const BList &rhs) throw(BListException) {
 
-		while (head_) {
-			BNode * tmpN = head_;
-			head_ = head_->next;
-			delete tmpN;
-		}
+        clear();
+        BNode * tmp = rhs.head_, *frontTracker = 0;
+        bls = rhs.bls;
 
-		return BList(rhs);
+        while (tmp) {
+            BNode * makeNode = new BNode();
+            makeNode->count = tmp->count;
+            for (unsigned i = 0; i < makeNode->count; ++i)
+                makeNode->values[i] = tmp->values[i];
+
+            if (head_) {
+                frontTracker->next = makeNode;
+                frontTracker->next->prev = frontTracker;
+                frontTracker = frontTracker->next;
+            }
+            else {
+                head_ = makeNode;
+                head_->prev = 0;
+                frontTracker = head_;
+            }
+
+
+            if (!tmp->next) {
+                tail_ = makeNode;
+                tail_->next = 0;
+            }
+
+            tmp = tmp->next;
+
+        }
+        return *this;
 	}
 
 	// arrays will be unsorted
@@ -210,7 +230,7 @@ public:
 
         if (tmp->count < Size) { // got space
 
-            int i = 0, j = tmp->count;
+            unsigned i = 0, j = tmp->count;
 
 		    for (; i < tmp->count;++i) {
 				if (!compare(tmp->values[i], value)) {
@@ -230,12 +250,25 @@ public:
             BNode* tmp2 = new BNode();
 
             if (Size != 1) {
-                int i = 0;
+                unsigned i = 0;
 
                 for (; i < tmp->count; ++i) {
                     if (!compare(tmp->values[i], value))
                         break;
                 }
+
+                if (i == tmp->count && tmp->next && tmp->next->count < Size) {
+                    delete tmp2;
+                    for (int i = tmp->next->count; i > 0; --i) 
+                        tmp->next->values[i] = tmp->next->values[i - 1];
+                    
+                    tmp->next->values[0] = value;
+                    ++tmp->next->count;
+                    ++bls.ItemCount;
+                    return;
+                }
+
+                
 
 				tmp2->next = tmp;
 				tmp2->prev = tmp->prev;
@@ -305,37 +338,54 @@ public:
 	}
 
     void remove(int index) throw(BListException) {
-        BNode * tmp = head_; 
+        BNode * tmp = head_;
+        bool match = false;
+        T num = this->operator[](index);
         int j = 0;
         while (tmp) {
-            bool break_ false;
-            for (int i = 0; i < tmp->count; ++i) {
-                if (tmp->values[i] == this->operator=[](index)) {
+            for (unsigned i = 0; i < tmp->count; ++i) {
+                if (tmp->values[i] == num) {
                     j = i;
-                    break_ = true;
+                    match = true;
                     break;
                 }
+                
             }
-
-            if (break_)
+            if (match)
                 break;
-
             tmp = tmp->next;
         }
 
         if (tmp) {
             if (tmp->count == 1) {
+                BNode * me = tmp;
+                if (tmp->prev)
+                    tmp->prev->next = tmp->next;
+              
+                if (tmp->next)
+                    tmp->next->prev = tmp->prev;
 
+                if (tmp == head_)
+                    head_ = head_->next;
+
+                if (tmp == tail_)
+                    tail_ = tail_->prev;
+                delete me;
+                --bls.NodeCount;
             }
             else {
-                for (int i = j; i > tmp->count - 1; ++i) {
+                for (unsigned i = j; i < tmp->count - 1; ++i) {
                     tmp->values[i] = tmp->values[i + 1];
                 }
                 --tmp->count;
             }
+            --bls.ItemCount;
         }
+
     }
-    void remove_by_value(const T& value) {}
+    void remove_by_value(const T& value) {
+        remove(find(value));
+    }
 
     int find(const T& value) const {      // returns index, -1 if not found
         if (insert_){
@@ -362,31 +412,31 @@ public:
 
     T& operator[](int index) throw(BListException) {
         BNode * tmp = head_;
-        T num{};
+        T * num = 0;
         while (tmp && index != -1) {
-            for (int i = 0;i < tmp->count && index != -1; ++i) {
-                num = tmp->values[i];
+            for (unsigned i = 0;i < tmp->count && index != -1; ++i) {
+                num = &tmp->values[i];
                 --index;
             }
             tmp = tmp->next;
         }
 
-        return num;
+        return *num;
     }
 	
 	// for l-values
 	const T& operator[](int index) const throw(BListException) { 
 		
         BNode * tmp = head_;
-        T num{};
+        T * num = 0;
         while (tmp && index != -1) {
-            for (int i = 0; i < tmp->count && index != -1; ++i) {
-                num = tmp->values[i];
+            for (unsigned i = 0; i < tmp->count && index != -1; ++i) {
+                num = &tmp->values[i];
                 --index;
             }
             tmp = tmp->next;
         }
-        return num;
+        return *num;
 	}; // for r-values
 
     
@@ -396,7 +446,18 @@ public:
         return bls.ItemCount;
     }
 
-	void clear(void) {};          // delete all nodes 
+	void clear(void) {
+        BNode * tmp = head_;
+        while (tmp) {
+            BNode * me = tmp;
+            tmp = tmp->next;
+            delete me;
+        }
+        head_ = NULL;
+        tail_ = NULL;
+        bls.ItemCount = 0;
+        bls.NodeCount = 0;
+    };          // delete all nodes 
 
     static unsigned nodesize(void); // so the allocator knows the size
 
