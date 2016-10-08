@@ -59,7 +59,7 @@ public:
 		BNode() : next(0), prev(0), count(0) {}
 	};
 
-	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0) {};                 // default constructor                        
+	BList() :head_(0), tail_(0), bls(nodesize(),0,Size,0), insert_(false) {};                 // default constructor                        
 	BList(const BList &rhs) { // copy constructor
 		
 		BNode * tmp = rhs.head_, *frontTracker = 0;
@@ -185,7 +185,7 @@ public:
 
 	// arrays will be sorted
 	void insert(const T& value) throw(BListException) {
-		
+        insert_ = true;
 		BNode * tmp = head_;
 
 		if (!head_) {
@@ -304,53 +304,66 @@ public:
 
 	}
 
-
-	
-
     void remove(int index) throw(BListException) {}
     void remove_by_value(const T& value) {}
 
     int find(const T& value) const {      // returns index, -1 if not found
-    
+        if (insert_){
+            T num = value;
+            int found = Bsearch(value);
+          //  std::cout << value << " is " << this->operator[](found) << std::endl;
+            return found;
+        }
+        else {
+            int rtnVal = 0;
+            BNode * tmp = head_;
+            while (tmp) {
+                for (unsigned i = 0; i < tmp->count; ++i) {
+                    if (tmp->values[i] == value)
+                        return rtnVal;
+
+                    ++rtnVal;
+                }
+                tmp = tmp->next;
+            }
+        }
+		return -1;
+    }
+
+    T& operator[](int index) throw(BListException) {
         BNode * tmp = head_;
-        while (tmp) {
-            for (unsigned i = 0; i < tmp->count; ++i) {
-                if (tmp->values[i] == value)
-                    return i;
+        T num{};
+        while (tmp && index != -1) {
+            for (int i = 0;i < tmp->count && index != -1; ++i) {
+                num = tmp->values[i];
+                --index;
             }
             tmp = tmp->next;
         }
 
-		return -1;
+        return num;
     }
-
-	T& operator[](int index) throw(BListException) { 
-		return *const_cast<T*>(&this->operator[](index));
-	}
+	
 	// for l-values
 	const T& operator[](int index) const throw(BListException) { 
 		
-		BNode * tmp = head_;
+        BNode * tmp = head_;
         T num{};
-		while (tmp && index!=-1) {
-			for (int i = 0; i < tmp->count; ++i) {
-				num = tmp->values[i];
-				--index;
-			}
-			tmp = tmp->next;
-		}
-		return num;
+        while (tmp && index != -1) {
+            for (int i = 0; i < tmp->count && index != -1; ++i) {
+                num = tmp->values[i];
+                --index;
+            }
+            tmp = tmp->next;
+        }
+        return num;
 	}; // for r-values
+
+    
 
     unsigned size(void) const {// total number of items (not nodes)
     
-        BNode * tmp = head_;
-        unsigned tmpNum = 0;
-        while (tmp) {
-            tmpNum += tmp->count;
-            tmp = tmp->next;
-        }
-        return tmpNum;
+        return bls.ItemCount;
     }
 
 	void clear(void) {};          // delete all nodes 
@@ -367,7 +380,7 @@ public:
 
     // Other private methods you may need
     BListStats bls;
-
+    bool insert_;
 	bool compare(T t, T t2) { return (t < t2); }
 
 	void sort(int count, T * arr1, T * arr2, T input, bool left) {
@@ -404,10 +417,31 @@ public:
 		}
 		
 
-		for (int i = 0; i < Size;++i)
-			std::cout << arr1[i] << " " << arr2[i] << std::endl;;
+	//	for (int i = 0; i < Size;++i)
+	//		std::cout << arr1[i] << " " << arr2[i] << std::endl;;
 		
 	}
+
+    int Bsearch(T input) const{
+        if (bls.ItemCount <= 1) 
+            return 1;
+        
+        int left = 0, right = bls.ItemCount - 1;
+        while (right >= left) {
+            int middle = left + (right - left) / 2;
+            if (input == this->operator[](middle)) {
+               // std::cout << this->operator[](middle) << std::endl;
+                return middle;
+            }
+            
+            if (input < this->operator[](middle))
+                right = middle - 1;
+            else
+                left = middle + 1;
+
+        }
+        return -1;
+    }
 };
 
 
