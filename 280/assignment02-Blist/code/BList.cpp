@@ -1,25 +1,79 @@
+/****************************************************************************/
+/*!
+\file   BList.cpp
+\author Ang Cheng Yong
+\par    email: a.chengyong\@digipen.edu
+\par    DigiPen login: a.chengyong
+\par    Course: CS280
+\par    Programming Assignment #2
+\date   9/10/2016
+\brief
+This file contains the implementation for BList.
+*/
+/****************************************************************************/
+
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size>unsigned BList<T, Size>::nodesize(void)
+\brief
+    Get size of type BNode
+\return
+    size of type BNode
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 unsigned BList<T, Size>::nodesize(void)
 {
   return sizeof(BNode);
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> const typename BList<T, Size>::BNode* BList<T, Size>::GetHead() const
+\brief
+Get the first node of BList
+
+\return
+Pointer to the firs BNode of BList
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 const typename BList<T, Size>::BNode* BList<T, Size>::GetHead() const
 {
   return head_; 
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size>BList<T, Size>::BList()
+\brief
+Default constructor for BList
+
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 BList<T, Size>::BList():head_(0), tail_(0), bls(nodesize(), 0, Size, 0), insert_(false){}
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size>BList<T, Size>::BList(const BList &rhs)
+\brief
+copy constructor for BList
+\param rhs
+BList to copy
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 BList<T, Size>::BList(const BList &rhs){
     BNode * tmp = rhs.head_, *frontTracker = 0;
     bls = rhs.bls;
     head_ = 0;
     tail_ = 0;
-    while (tmp) {
+    while (tmp) { // traverse through rhs for deep copy
         BNode * makeNode = 0;
         try{
             makeNode = new BNode();
@@ -27,17 +81,20 @@ BList<T, Size>::BList(const BList &rhs){
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+        for (unsigned i = 0; i < Size; ++i)
+            makeNode->values[i] = static_cast<T>(0);
+
         makeNode->count = tmp->count;
-        for (unsigned i = 0; i < makeNode->count; ++i)
+        for (unsigned i = 0; i < makeNode->count; ++i) // fill values
             makeNode->values[i] = tmp->values[i];
 
-        if (head_) {
+        if (head_) { //connect nodes if theres a head
             frontTracker->next = makeNode;
             frontTracker->next->prev = frontTracker;
             frontTracker = frontTracker->next;
 
         }
-        else {
+        else { 
             head_ = makeNode;
             head_->prev = 0;
             frontTracker = head_;
@@ -54,17 +111,38 @@ BList<T, Size>::BList(const BList &rhs){
     }
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size>BList<T, Size>::~BList()
+\brief
+destructor for BList
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 BList<T, Size>::~BList(){ clear(); }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> BList<T, Size>& BList<T, Size>::operator=(const BList &rhs) throw(BListException)
+\brief
+assignment operator for BList
+\param rhs
+BList to assign over
+
+\return
+Reference to the BList itself 
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 BList<T, Size>& BList<T, Size>::operator=(const BList &rhs) throw(BListException){
 
-    clear();
+    clear(); // clear ownself before assignment
     BNode * tmp = rhs.head_, *frontTracker = 0;
     bls = rhs.bls;
 
-    while (tmp) {
+    while (tmp) { // traverse to deep copy
         BNode * makeNode = 0;
         try{
             makeNode = new BNode();
@@ -72,11 +150,14 @@ BList<T, Size>& BList<T, Size>::operator=(const BList &rhs) throw(BListException
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+        for (unsigned i = 0; i < Size; ++i)
+            makeNode->values[i] = static_cast<T>(0);
+
         makeNode->count = tmp->count;
         for (unsigned i = 0; i < makeNode->count; ++i)
             makeNode->values[i] = tmp->values[i];
 
-        if (head_) {
+        if (head_) { // connect nodes if there a head node
             frontTracker->next = makeNode;
             frontTracker->next->prev = frontTracker;
             frontTracker = frontTracker->next;
@@ -89,7 +170,7 @@ BList<T, Size>& BList<T, Size>::operator=(const BList &rhs) throw(BListException
 
 
         if (!tmp->next) {
-            tail_ = makeNode;
+            tail_ = frontTracker;
             tail_->next = 0;
         }
 
@@ -100,10 +181,21 @@ BList<T, Size>& BList<T, Size>::operator=(const BList &rhs) throw(BListException
     
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::push_back(const T& value) throw(BListException)
+\brief
+Add an item to BList, add one more node to the end of the list if all list are full
+\param value
+value to be added to the list
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::push_back(const T& value) throw(BListException) {
 
-    if (tail_) {
+    if (tail_) { // connect nodes if theres already nodes in it
         if (tail_->count < Size)  // got space
             tail_->values[tail_->count++] = value;
         else {
@@ -114,10 +206,13 @@ void BList<T, Size>::push_back(const T& value) throw(BListException) {
             catch (BListException &){
                 throw(BListException(BListException::E_NO_MEMORY, "no memory"));
             }
+
+            for (unsigned i = 0; i < Size; ++i)
+                tail_->next->values[i] = static_cast<T>(0);
+
             tail_->next->count = 1;
             tail_->next->prev = tail_;
             tail_->next->next = 0;
-            //	std::cout << value << std::endl;
             tail_->next->values[0] = value;
 
             tail_ = tail_->next;
@@ -135,8 +230,12 @@ void BList<T, Size>::push_back(const T& value) throw(BListException) {
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+
+        for (unsigned i = 0; i < Size; ++i)
+            head_->values[i] = static_cast<T>(0);
+
         head_->prev =
-            head_->next = 0;
+        head_->next = 0;
         head_->values[0] = value;
         head_->count = 1;
         tail_ = head_;
@@ -146,6 +245,17 @@ void BList<T, Size>::push_back(const T& value) throw(BListException) {
 
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::push_front(const T& value) throw(BListException)
+\brief
+Add an item to BList, add one more node to the front of the list if all list are full
+\param value
+value to be added to the list
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::push_front(const T& value) throw(BListException) {
 
@@ -159,22 +269,26 @@ void BList<T, Size>::push_front(const T& value) throw(BListException) {
         return;
     }
 
-    // no space or empty list
-    if (!head_) {
+     
+    if (!head_) { // empty list
         try{
             head_ = new BNode();
         }
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+
+        for (unsigned i = 0; i < Size; ++i)
+            head_->values[i] = static_cast<T>(0);
+
         head_->prev =
-            head_->next = 0;
+        head_->next = 0;
         head_->values[0] = value;
         head_->count = 1;
         tail_ = head_;
         ++bls.NodeCount;
     }
-    else {
+    else { // no space, make a head
         BNode * tmp = 0;
         try{
             tmp = new BNode();
@@ -182,6 +296,10 @@ void BList<T, Size>::push_front(const T& value) throw(BListException) {
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+
+        for (unsigned i = 0; i < Size; ++i)
+            tmp->values[i] = static_cast<T>(0);
+
         tmp->values[0] = value;
         tmp->count = 1;
         tmp->next = head_;
@@ -193,6 +311,17 @@ void BList<T, Size>::push_front(const T& value) throw(BListException) {
     ++bls.ItemCount;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::insert(const T& value) throw(BListException)
+\brief
+Add an item to BList, add one more node to the list accordingly if all list are full
+\param value
+value to be added to the list
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::insert(const T& value) throw(BListException) {
     insert_ = true;
@@ -244,6 +373,10 @@ void BList<T, Size>::insert(const T& value) throw(BListException) {
         catch (BListException &){
             throw(BListException(BListException::E_NO_MEMORY, "no memory"));
         }
+
+        for (unsigned i = 0; i < Size; ++i)
+            tmp2->values[i] = static_cast<T>(0);
+
         unsigned one = 1;
         if (Size != one) {
             unsigned i = 0;
@@ -252,7 +385,7 @@ void BList<T, Size>::insert(const T& value) throw(BListException) {
                 if (!compare(tmp->values[i], value))
                     break;
             }
-
+            // if left node full but right node have space
             if (i == tmp->count && tmp->next && tmp->next->count < Size) {
                 delete tmp2;
                 for (int i = tmp->next->count; i > 0; --i)
@@ -264,14 +397,12 @@ void BList<T, Size>::insert(const T& value) throw(BListException) {
                 return;
             }
 
-
-
             tmp2->next = tmp;
             tmp2->prev = tmp->prev;
 
             if (!tmp2->prev)
                 head_ = tmp2;
-
+            //split and sort node
             sort(tmp->count, tmp->values, tmp2->values, value, (i <= tmp->count / 2));
             if (i <= tmp->count / 2) {
                 tmp2->count = Size / 2 + 1;
@@ -290,7 +421,7 @@ void BList<T, Size>::insert(const T& value) throw(BListException) {
             if (!tmp->next)
                 tail_ = tmp;
         }
-        else{
+        else{ // case where Size is only 1
             tmp2->count = 1;
             tmp2->next = tmp->next;
             if (tmp2->next)
@@ -333,6 +464,17 @@ void BList<T, Size>::insert(const T& value) throw(BListException) {
 
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::remove(int index) throw(BListException)
+\brief
+Remove an element in the list by index, removes an empty node from the node as well
+\param index
+index of the value relative to the entire BList to remove
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::remove(int index) throw(BListException) {
     try{
@@ -387,18 +529,40 @@ void BList<T, Size>::remove(int index) throw(BListException) {
 
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::remove_by_value(const T& value)
+\brief
+Remove an element in the list by value, removes an empty node from the node as well
+\param value
+ value relative to the entire BList to remove
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::remove_by_value(const T& value) {
     remove(find(value));
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> int BList<T, Size>::find(const T& value) const
+\brief
+find an element in Blist by value
+\param value
+value relative to the entire BList to remove
+\return
+index of found value, -1 if none
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
-int BList<T, Size>::find(const T& value) const {      // returns index, -1 if not found
+int BList<T, Size>::find(const T& value) const {   
     if (insert_){
-        //  std::cout << value << " is " << this->operator[](found) << std::endl;
-        return Bsearch(value);
+        // binary search when array is sorted by insertion
+        return Bsearch(value); 
     }
-    else {
+    else { // find by linear search
         int rtnVal = 0;
         BNode * tmp = head_;
         while (tmp) {
@@ -414,6 +578,17 @@ int BList<T, Size>::find(const T& value) const {      // returns index, -1 if no
     return -1;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> T& BList<T, Size>::operator[](int index) throw(BListException)
+\brief
+l-value subscript operator for BList
+\param index
+index of value to be retrieved
+\return
+value of index in Blist
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 T& BList<T, Size>::operator[](int index) throw(BListException) {
     if (index == -1 || static_cast<unsigned>(index) > bls.ItemCount)
@@ -421,7 +596,7 @@ T& BList<T, Size>::operator[](int index) throw(BListException) {
 
     BNode * tmp = head_;
     T * num = 0;
-    while (tmp && index != -1) {
+    while (tmp && index != -1) { // linear search till index is -1
         for (unsigned i = 0; i < tmp->count && index != -1; ++i) {
             num = &tmp->values[i];
             --index;
@@ -432,6 +607,17 @@ T& BList<T, Size>::operator[](int index) throw(BListException) {
     return *num;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> const T& BList<T, Size>::operator[](int index) throw(BListException)
+\brief
+r-value subscript operator for BList
+\param index
+index of value to be retrieved
+\return
+value of index in Blist
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 const T& BList<T, Size>::operator[](int index) const throw(BListException) {
     if (index == -1 || static_cast<unsigned>(index) > bls.ItemCount)
@@ -439,7 +625,7 @@ const T& BList<T, Size>::operator[](int index) const throw(BListException) {
 
     BNode * tmp = head_;
     T * num = 0;
-    while (tmp && index != -1) {
+    while (tmp && index != -1) { // linear search till index is -1
         for (unsigned i = 0; i < tmp->count && index != -1; ++i) {
             num = &tmp->values[i];
             --index;
@@ -449,11 +635,31 @@ const T& BList<T, Size>::operator[](int index) const throw(BListException) {
     return *num;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size>unsigned BList<T, Size>::size(void) const
+\brief
+get total number of items in Blist
+
+\return
+total number of items in Blist
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 unsigned BList<T, Size>::size(void) const {
     return bls.ItemCount;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::clear(void)
+\brief
+clear Blist of all nodes
+
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::clear(void) {
     BNode * tmp = head_;
@@ -468,9 +674,38 @@ void BList<T, Size>::clear(void) {
     bls.NodeCount = 0;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> BListStats BList<T, Size>::GetStats() const
+\brief
+get statistics for BList
+
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 BListStats BList<T, Size>::GetStats() const { return bls; }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> void BList<T, Size>::sort(unsigned count, T * arr1, T * arr2, T input, bool left)
+\brief
+if splitting is necessary, sort out the values and split them accordingly
+\param count
+item count in the full node
+\param arr1
+array of full node
+\param arr2
+array to be filled
+\param input
+value to be added and sorted accordingly
+\param left
+whether left or right node should have more values
+\return
+None
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 void BList<T, Size>::sort(unsigned count, T * arr1, T * arr2, T input, bool left) {
 
@@ -508,6 +743,17 @@ void BList<T, Size>::sort(unsigned count, T * arr1, T * arr2, T input, bool left
 
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> int BList<T, Size>::Bsearch(T input) const
+\brief
+binary search to find index of value
+\param input
+value to be matched against
+\return
+index of value found
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 int BList<T, Size>::Bsearch(T input) const{
     if (bls.ItemCount <= 1)
@@ -529,5 +775,18 @@ int BList<T, Size>::Bsearch(T input) const{
     return -1;
 }
 
+/****************************************************************************/
+/*!
+\fn template <typename T, unsigned Size> bool BList<T, Size>::compare(T t, T t2)
+\brief
+type comparison
+\param t
+type to be matched
+\param t2
+type to be matched
+\return
+boolean of whether which is smaller
+*/
+/****************************************************************************/
 template <typename T, unsigned Size>
 bool BList<T, Size>::compare(T t, T t2) { return (t < t2); }

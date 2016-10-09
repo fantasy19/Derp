@@ -2,9 +2,24 @@
 #ifndef BLIST_H
 #define BLIST_H
 ////////////////////////////////////////////////////////////////////////////////
+
+/****************************************************************************/
+/*!
+\file   BList.h
+\author Ang Cheng Yong
+\par    email: a.chengyong\@digipen.edu
+\par    DigiPen login: a.chengyong
+\par    Course: CS280
+\par    Programming Assignment #2
+\date   9/10/2016
+\brief
+This file contains the driver functions needed for BList.
+*/
+/****************************************************************************/
+
 #include <string>     // error strings
 #include <stdexcept>  // std::exception
-#include <iostream>
+
 #ifdef _MSC_VER
 #pragma warning( disable : 4290 ) // suppress warning: C++ Exception Specification ignored
 #endif
@@ -56,10 +71,7 @@ public:
 		BNode *prev;
 		unsigned count; // number of items currently in the node
         T values[Size];
-        BNode() : next(0), prev(0), count(0) {
-            for (unsigned i = 0; i < Size; ++i)
-                values[i] = static_cast<T>(0);
-        }
+        BNode() : next(0), prev(0), count(0){};
 	};
 
 	BList();                 // default constructor
