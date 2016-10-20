@@ -60,9 +60,12 @@ class Sudoku
     SudokuStats GetStats() const;
 
   private:
-    size_t moves_;
-
+    size_t moves_,width;
+	SudokuStats sStats;
     // Other private fields and methods...
+	char * board;
+	CALLBACK cb;
+	char first, last;
 
 };
 
