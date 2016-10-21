@@ -18,13 +18,16 @@
     <ClInclude Include="..\..\Sudoku.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\getopt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\driver-sample.cpp">
+    <ClCompile Include="..\..\Sudoku.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Sudoku.cpp">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="..\..\driver.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

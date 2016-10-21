@@ -60,13 +60,15 @@ class Sudoku
     SudokuStats GetStats() const;
 
   private:
-    size_t moves_,width;
+	size_t moves_;
 	SudokuStats sStats;
     // Other private fields and methods...
 	char * board;
 	CALLBACK cb;
+	size_t width;
 	char first, last;
-
+	int index;
+	bool place_value(size_t);
 };
 
 #endif  // SUDOKUH
