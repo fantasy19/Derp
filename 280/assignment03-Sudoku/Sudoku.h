@@ -69,6 +69,16 @@ class Sudoku
 	char first, last;
 	int index;
 	bool place_value(size_t);
+    /*
+    void dumpboard() {
+        for (size_t i = 0; i < width*width; ++i) {
+            if (i%width && i)
+                std::cout << std::endl;
+            std::cout << board[i] << " ";
+            
+        }
+    }
+    */
 };
 
 #endif  // SUDOKUH

@@ -1,4 +1,5 @@
 #include "Sudoku.h"
+#include <iostream>
 
 Sudoku::Sudoku(int basesize, SymbolType stype , CALLBACK callback ) :board(0), cb(callback) {
 
@@ -9,7 +10,7 @@ Sudoku::Sudoku(int basesize, SymbolType stype , CALLBACK callback ) :board(0), c
 
 	first = (stype) ? 'A' : '1';
 	width = basesize*basesize;
-	last = first + (char)width;
+	last = first + static_cast<char>( (stype)?width:(width-1) );
 	
 }
 
@@ -35,14 +36,18 @@ void Sudoku::SetupBoard(const char *values, size_t size) {
 bool Sudoku::Solve() {
 	SetupBoard(board, sStats.basesize* sStats.basesize);
 
-	return (place_value(1)) ? true : false;
+	return (place_value(0)) ? true : false;
 }
 
 bool Sudoku::place_value(size_t place) {
 	bool replace = false;
 	
+    
+
 	for (char val = first; val <= last; ++val) {
 
+        if (board[place] != EMPTY_CHAR)
+            place_value(++place);
 		//if (!cb(*this, board, MSG_ABORT_CHECK, sStats.moves, sStats.basesize, (unsigned)place, board[place]))
 		//	return false;
 
@@ -54,7 +59,8 @@ bool Sudoku::place_value(size_t place) {
 
 		size_t startrow = place - place%width ;
 		size_t endrow = startrow + width;
-
+       // std::cout << place << std::endl;
+       // std::cout << startrow << " " << endrow << std::endl;
 		//row check
 		for (size_t i = startrow; i != endrow;++i) {
 			if (board[i] == val && i != place) {
@@ -65,7 +71,8 @@ bool Sudoku::place_value(size_t place) {
 
 		size_t startcol = place%width;
 		size_t endcol = startcol + (width - 1)*width;
-
+      //  std::cout << place << std::endl;
+      //  std::cout << startcol << " " << endcol << std::endl;
 		//column check
 		for (size_t i = startcol; i != endcol;i+=width) {
 			if (board[i] == val && i != place) {
@@ -76,31 +83,37 @@ bool Sudoku::place_value(size_t place) {
 
 		size_t offset = (sStats.basesize - 1) * sStats.basesize;
 		size_t boxstart = place - (place % sStats.basesize);
-		//size_t boxend = boxstart + (sStats.basesize - 1) * width + sStats.basesize;
+		size_t boxend = boxstart + (sStats.basesize - 1) * width + sStats.basesize-1;
 
-		for (size_t i = boxstart; i < sStats.basesize;i += offset) {
-			for (size_t j = 0; j < sStats.basesize; ++j) {
+       //   std::cout << place << std::endl;
+       //   std::cout << boxstart << " " << boxend << std::endl;
+
+		for (size_t i = boxstart; i <= boxend;i += offset) {
+            bool brake = false;
+			for (size_t j = 0; j <= sStats.basesize-1; ++j) {
 				if (board[i+j] == val && i+j != place) {
+                    brake = 
 					replace = true;
 					break;
 				}
 			}
+            if (brake) break;
 		}
 
-		if (!replace) {
+		if (!replace) { // no conflict
 			++sStats.placed;
 			if (place != (width*width) - 1) 
 				place_value(++place);
 			else
-				break;	
+				break;	// nothing else left to do
 		}
-		else {
-		//	if (!cb(*this, board, MSG_ABORT_CHECK, sStats.moves, sStats.basesize, (unsigned)place, board[place]))
-		//		return false;
+		else { // conflict
 
-			board[place] = EMPTY_CHAR;
-			//cb(*this, board, MSG_REMOVING, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
-			if (val == last) {
+            if (board[place] < last)
+                board[place] = EMPTY_CHAR;
+            
+			if (board[place] == last) {
+                board[place] = EMPTY_CHAR;
 				++sStats.backtracks;
 				--moves_;
 				return replace;
