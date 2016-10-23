@@ -3,6 +3,8 @@
 #define SUDOKUH
 //---------------------------------------------------------------------------
 #include <stddef.h> // size_t
+#include<iostream>
+#include <vector>
 
 class Sudoku
 {
@@ -65,20 +67,22 @@ class Sudoku
     // Other private fields and methods...
 	char * board;
 	CALLBACK cb;
-	size_t width;
+    size_t width, boxWidth;
 	char first, last;
-	int index;
-	bool place_value(size_t);
-    /*
+	bool place_value(size_t&);
+    bool ConflictCheck(size_t&,char);
+
     void dumpboard() {
         for (size_t i = 0; i < width*width; ++i) {
-            if (i%width && i)
+            if (i && !(i%width))
                 std::cout << std::endl;
+
             std::cout << board[i] << " ";
-            
         }
+        std::cout << std::endl;
+        std::cout << "--------" << std::endl;
     }
-    */
+    
 };
 
 #endif  // SUDOKUH
