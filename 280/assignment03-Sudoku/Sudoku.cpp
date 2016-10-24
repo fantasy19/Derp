@@ -6,9 +6,8 @@ Sudoku::Sudoku(int basesize, SymbolType stype , CALLBACK callback ) :board(0), c
 	sStats.basesize = basesize; 
 	sStats.backtracks =
 	sStats.moves =
-	sStats.placed = 0;
-
-    boxWidth = 0;
+	sStats.placed =
+	totalplacement = 0;
 
 	first = (stype) ? 'A' : '1';
 	width = basesize*basesize;
@@ -32,7 +31,11 @@ void Sudoku::SetupBoard(const char *values, size_t size) {
 
     for (size_t i = 0; i < size; ++i) {
         
+		
+
         board[i] = (values[i] == '.') ? EMPTY_CHAR : values[i];
+		if (board[i] == EMPTY_CHAR)
+			++totalplacement;
        // std::cout << board[i] << std::endl;
     }
    // dumpboard();
@@ -41,8 +44,17 @@ void Sudoku::SetupBoard(const char *values, size_t size) {
 bool Sudoku::Solve() {
 	//SetupBoard(board, sStats.basesize* sStats.basesize);
     
+	cb(*this, board, MSG_STARTING, sStats.moves, sStats.basesize, 0, 0);
+
     size_t init_val = 0;
-	return (place_value(init_val)) ? true : false;
+	if (place_value(init_val)) {
+		cb(*this, board, MSG_FINISHED_OK, sStats.moves, sStats.basesize, 0, 0);
+		return true;
+	}
+	else {
+		cb(*this, board, MSG_FINISHED_FAIL, sStats.moves, sStats.basesize, 0, 0);
+		return false;
+	}
 }
 
 bool Sudoku::place_value(size_t place) {
@@ -51,36 +63,48 @@ bool Sudoku::place_value(size_t place) {
     if (place == (width*width))
         return true;
 
-    if (board[place] != EMPTY_CHAR) 
-        place_value(place+1);
-    
+	if (place == 80)
+		++moves_;
+	//	cb(*this, board, MSG_FINISHED_OK, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
 
+	if (board[place] != EMPTY_CHAR)
+		return place_value(place + 1);
+
+	
+	
+    
 	for (char val = first; val <= last; ++val) {
 		//if (!cb(*this, board, MSG_ABORT_CHECK, sStats.moves, sStats.basesize, (unsigned)place, board[place]))
 		//	return false;
-        if (place == (width*width))
-            return true;
+       // if (place == (width*width)) // all solved
+       //     return true;
 
 		board[place] = val;
 		++moves_;
 		++sStats.moves;
         
-		//cb(*this, board, MSG_PLACING, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
         
-        if (ConflictCheck(place, val)) {
-            ++sStats.placed;
-            if (place == (width*width) - 1) 
-                return true;
-            else 
-                return place_value(place+1);
-            
-        }
+		//cb(*this, board, MSG_PLACING, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
+		if (ConflictCheck(place, board[place])) {
+			++sStats.placed;
+			if (place == (width*width) - 1)
+				return true;
+			else {
+				if (place_value(place + 1)) 
+					return true;
+				
+			}
+			
+			
+		}
         else 
             board[place] = EMPTY_CHAR;
         
 	}
+
     board[place] = EMPTY_CHAR;
     ++sStats.backtracks;
+	--sStats.placed;
     --moves_;
 	return false;
 }
@@ -94,17 +118,19 @@ bool Sudoku::ConflictCheck(size_t place, char val) {
     //row check
     for (size_t i = startrow; i < endrow; ++i) {
         if (board[i] == val && i != place) {
+			//return false;
             maintain = false;
             break;
         }
     }
 
-    size_t startcol = place%width;
+    size_t startcol = place % width;
     size_t endcol = startcol + (width - 1)*width;
     
     //column check
     for (size_t i = startcol; i <= endcol; i += width) {
         if (board[i] == val && i != place) {
+			//return false;
             maintain = false;
             break;
         }
@@ -113,8 +139,7 @@ bool Sudoku::ConflictCheck(size_t place, char val) {
     size_t boxstart = place - (place % sStats.basesize); // row 
     size_t rowoffset = place / width;
     
-    if (rowoffset % width)
-        boxstart -= rowoffset * width; // column
+    boxstart -= (rowoffset % sStats.basesize) * width; // column
 
     size_t boxend = boxstart + (sStats.basesize - 1) * width;
 
@@ -123,6 +148,7 @@ bool Sudoku::ConflictCheck(size_t place, char val) {
         bool brake = true;
         for (size_t j = 0; j <= sStats.basesize - 1; ++j) {
             if (board[i + j] == val && (i + j) != place) {
+				//return false;
                 brake =
                 maintain = false;
                 break;
@@ -130,13 +156,13 @@ bool Sudoku::ConflictCheck(size_t place, char val) {
         }
         if (!brake) break;
     }
-
+	/*
     std::cout << "row: " << startrow << " " << endrow << std::endl;
     std::cout << "--" << std::endl;
     std::cout << "column: " << startcol << " " << endcol << std::endl;
     std::cout << "--" << std::endl;
     std::cout << "box: " << boxstart << " " << boxend << std::endl;
     std::cout << "--" << std::endl;
-    dumpboard();
+    dumpboard();*/
     return maintain;
 }

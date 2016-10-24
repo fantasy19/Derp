@@ -60,28 +60,29 @@ class Sudoku
       // For debugging with the driver
     const char *GetBoard() const;
     SudokuStats GetStats() const;
+	void dumpboard() {
+		std::cout << "--------" << std::endl;
+		for (size_t i = 0; i < width*width; ++i) {
+			if (i && !(i%width))
+				std::cout << std::endl;
 
+			std::cout << board[i] << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "--------" << std::endl;
+	}
   private:
 	size_t moves_;
 	SudokuStats sStats;
     // Other private fields and methods...
 	char * board;
 	CALLBACK cb;
-    size_t width, boxWidth;
+    size_t width, totalplacement;
 	char first, last;
 	bool place_value(size_t);
     bool ConflictCheck(size_t,char);
 
-    void dumpboard() {
-        for (size_t i = 0; i < width*width; ++i) {
-            if (i && !(i%width))
-                std::cout << std::endl;
-
-            std::cout << board[i] << " ";
-        }
-        std::cout << std::endl;
-        std::cout << "--------" << std::endl;
-    }
+    
     
 };
 
