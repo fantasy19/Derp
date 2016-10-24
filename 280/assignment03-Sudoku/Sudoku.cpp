@@ -45,14 +45,14 @@ bool Sudoku::Solve() {
 	return (place_value(init_val)) ? true : false;
 }
 
-bool Sudoku::place_value(size_t & place) {
+bool Sudoku::place_value(size_t place) {
 	bool replace = false;
 	
     if (place == (width*width))
         return true;
 
     if (board[place] != EMPTY_CHAR) 
-        place_value(++place);
+        place_value(place+1);
     
 
 	for (char val = first; val <= last; ++val) {
@@ -72,21 +72,20 @@ bool Sudoku::place_value(size_t & place) {
             if (place == (width*width) - 1) 
                 return true;
             else 
-                return place_value(++place);
+                return place_value(place+1);
             
         }
         else 
             board[place] = EMPTY_CHAR;
         
 	}
-
     board[place] = EMPTY_CHAR;
     ++sStats.backtracks;
     --moves_;
 	return false;
 }
 
-bool Sudoku::ConflictCheck(size_t & place, char val) {
+bool Sudoku::ConflictCheck(size_t place, char val) {
     bool maintain = true;
 
     size_t startrow = place - place%width;
@@ -111,7 +110,6 @@ bool Sudoku::ConflictCheck(size_t & place, char val) {
         }
     }
 
-   // size_t offset = (sStats.basesize - 1) * sStats.basesize + 1;
     size_t boxstart = place - (place % sStats.basesize); // row 
     size_t rowoffset = place / width;
     
@@ -120,7 +118,7 @@ bool Sudoku::ConflictCheck(size_t & place, char val) {
 
     size_t boxend = boxstart + (sStats.basesize - 1) * width;
 
-  
+    // box check
     for (size_t i = boxstart; i <= boxend; i += width) {
         bool brake = true;
         for (size_t j = 0; j <= sStats.basesize - 1; ++j) {

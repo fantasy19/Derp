@@ -69,8 +69,8 @@ class Sudoku
 	CALLBACK cb;
     size_t width, boxWidth;
 	char first, last;
-	bool place_value(size_t&);
-    bool ConflictCheck(size_t&,char);
+	bool place_value(size_t);
+    bool ConflictCheck(size_t,char);
 
     void dumpboard() {
         for (size_t i = 0; i < width*width; ++i) {
