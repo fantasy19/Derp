@@ -2,6 +2,21 @@
 #ifndef SUDOKUH
 #define SUDOKUH
 //---------------------------------------------------------------------------
+
+/****************************************************************************/
+/*!
+\file   Sudoku.h
+\author Ang Cheng Yong
+\par    email: a.chengyong\@digipen.edu
+\par    DigiPen login: a.chengyong
+\par    Course: CS280
+\par    Programming Assignment #3
+\date   25/10/2016
+\brief
+This file contains the driver functions needed for Sudoku.
+*/
+/****************************************************************************/
+
 #include <stddef.h> // size_t
 #include<iostream>
 #include <vector>
@@ -60,21 +75,12 @@ class Sudoku
       // For debugging with the driver
     const char *GetBoard() const;
     SudokuStats GetStats() const;
-	void dumpboard() {
-		std::cout << "--------" << std::endl;
-		for (size_t i = 0; i < width*width; ++i) {
-			if (i && !(i%width))
-				std::cout << std::endl;
 
-			std::cout << board[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "--------" << std::endl;
-	}
   private:
-	size_t moves_;
+	  // Other private fields and methods...
+	size_t moves_; 
 	SudokuStats sStats;
-    // Other private fields and methods...
+    
 	char * board;
 	CALLBACK cb;
     size_t width;
