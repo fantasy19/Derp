@@ -6,12 +6,12 @@ Sudoku::Sudoku(int basesize, SymbolType stype , CALLBACK callback ) :board(0), c
 	sStats.basesize = basesize; 
 	sStats.backtracks =
 	sStats.moves =
-	sStats.placed =
-	totalplacement = 0;
+	sStats.placed = 0;
+
 
 	first = (stype) ? 'A' : '1';
 	width = basesize*basesize;
-	last = first + static_cast<char>( (stype)?width:(width-1) );
+	last = first + static_cast<char>( width-1 );
 	
 }
 
@@ -34,8 +34,6 @@ void Sudoku::SetupBoard(const char *values, size_t size) {
 		
 
         board[i] = (values[i] == '.') ? EMPTY_CHAR : values[i];
-		if (board[i] == EMPTY_CHAR)
-			++totalplacement;
        // std::cout << board[i] << std::endl;
     }
    // dumpboard();
@@ -58,48 +56,49 @@ bool Sudoku::Solve() {
 }
 
 bool Sudoku::place_value(size_t place) {
-	bool replace = false;
+	//bool replace = false;
 	
     if (place == (width*width))
         return true;
 
-	if (place == 80)
-		++moves_;
+	//std::cout << sStats.moves << std::endl;
 	//	cb(*this, board, MSG_FINISHED_OK, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
 
 	if (board[place] != EMPTY_CHAR)
 		return place_value(place + 1);
-
-	
-	
     
 	for (char val = first; val <= last; ++val) {
-		//if (!cb(*this, board, MSG_ABORT_CHECK, sStats.moves, sStats.basesize, (unsigned)place, board[place]))
-		//	return false;
-       // if (place == (width*width)) // all solved
-       //     return true;
+		bool abort = cb(*this, board, MSG_ABORT_CHECK, sStats.moves, sStats.basesize, static_cast<unsigned>(place), board[place]);
+
+		if (abort)
+			return false;
 
 		board[place] = val;
 		++moves_;
 		++sStats.moves;
-        
-        
-		//cb(*this, board, MSG_PLACING, sStats.moves, sStats.basesize, (unsigned)place, board[place]);
+		++sStats.placed;
+
+		cb(*this, board, MSG_PLACING, sStats.moves, sStats.basesize, static_cast<unsigned>(place), board[place]);
+
 		if (ConflictCheck(place, board[place])) {
-			++sStats.placed;
+			
 			if (place == (width*width) - 1)
 				return true;
 			else {
 				if (place_value(place + 1)) 
 					return true;
 				
+				if (abort)
+					return false;
 			}
 			
 			
 		}
-        else 
-            board[place] = EMPTY_CHAR;
-        
+		else {
+			board[place] = EMPTY_CHAR;
+			--sStats.placed;
+			cb(*this, board, MSG_REMOVING, sStats.moves, sStats.basesize, static_cast<unsigned>(place), val);
+		}
 	}
 
     board[place] = EMPTY_CHAR;

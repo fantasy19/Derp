@@ -77,7 +77,7 @@ class Sudoku
     // Other private fields and methods...
 	char * board;
 	CALLBACK cb;
-    size_t width, totalplacement;
+    size_t width;
 	char first, last;
 	bool place_value(size_t);
     bool ConflictCheck(size_t,char);
