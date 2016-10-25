@@ -11,7 +11,8 @@ Sudoku::Sudoku(int basesize, SymbolType stype , CALLBACK callback ) :board(0), c
 
 	first = (stype) ? 'A' : '1';
 	width = basesize*basesize;
-	last = first + static_cast<char>( width-1 );
+
+	last = static_cast<char>(first + static_cast<char>( width-1 ));
 	
 }
 
