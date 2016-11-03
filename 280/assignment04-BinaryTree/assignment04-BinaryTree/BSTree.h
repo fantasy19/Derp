@@ -8,6 +8,7 @@
 
 #include <string>    // std::string
 #include <stdexcept> // std::exception
+#include "ObjectAllocator.h"
 
 class BSTException : public std::exception
 {
@@ -67,6 +68,7 @@ class BSTree
     void free_node(BinTree node);
     int tree_height(BinTree tree) const;
     void find_predecessor(BinTree tree, BinTree &predecessor) const;
+	BinTree root_;
     
   private:
     // private stuff    
@@ -76,3 +78,4 @@ class BSTree
 
 #endif
 //---------------------------------------------------------------------------
+
