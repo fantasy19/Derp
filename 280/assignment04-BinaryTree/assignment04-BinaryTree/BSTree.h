@@ -71,6 +71,7 @@ class BSTree
 	BinTree root_;
     
   private:
+	void free_tree(BinTree root);
     // private stuff    
 };
 
