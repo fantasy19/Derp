@@ -21,7 +21,7 @@ class AVLTree : public BSTree<T>
     // private stuff
 };
 
-#include "AVLTree.cpp"
+#include "AVLTree.h"
 
 #endif
 //---------------------------------------------------------------------------
