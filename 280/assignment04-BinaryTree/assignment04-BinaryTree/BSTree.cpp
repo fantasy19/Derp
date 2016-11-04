@@ -165,8 +165,6 @@ void BSTree<T>::free_node(BinTree node) {
 	if (node == 0)
 		return;
 
-	
-
 }
 
 template <typename T>
