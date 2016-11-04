@@ -68,10 +68,14 @@ class BSTree
     void free_node(BinTree node);
     int tree_height(BinTree tree) const;
     void find_predecessor(BinTree tree, BinTree &predecessor) const;
-	BinTree root_;
+	
     
   private:
 	void free_tree(BinTree root);
+	void copy_tree(BinTree lhs, BinTree rhs);
+	BinTree root_;
+	ObjectAllocator * oa;
+	bool share;
     // private stuff    
 };
 
