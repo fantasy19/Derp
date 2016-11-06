@@ -9,13 +9,13 @@ template <typename T>
 class AVLTree : public BSTree<T>
 {
   public:
-    AVLTree(ObjectAllocator *OA = 0, bool ShareOA = false);
-    virtual ~AVLTree();
-    virtual void insert(const T& value) throw(BSTException);
-    virtual void remove(const T& value);
+	  AVLTree(ObjectAllocator *OA = 0, bool ShareOA = false) {}
+	  virtual ~AVLTree() {}
+	virtual void insert(const T& value) throw(BSTException) {}
+	virtual void remove(const T& value) {}
 
       // Returns true if efficiency implemented
-    static bool ImplementedBalanceFactor(void);
+	static bool ImplementedBalanceFactor(void) { return false; }
     
   private:
     // private stuff

@@ -73,7 +73,11 @@ class BSTree
   private:
 	void free_tree(BinTree root);
 	void copy_tree(BinTree lhs, BinTree rhs);
-	void insert_node()
+	void delete_node(BinTree & Tree, const T& value);
+	void insert_node(BinTree tree, const T& value);
+	bool find_node(BinTree tree, const T& value, unsigned& compares) const;
+	unsigned int count;
+
 	BinTree root_;
 	ObjectAllocator * oa;
 	bool share;
