@@ -72,10 +72,12 @@ class BSTree
     
   private:
 	void free_tree(BinTree root);
-	void copy_tree(BinTree lhs, BinTree rhs);
+	void copy_tree(BinTree &lhs, BinTree rhs);
 	void delete_node(BinTree & Tree, const T& value);
-	void insert_node(BinTree tree, const T& value);
-	bool find_node(BinTree tree, const T& value, unsigned& compares) const;
+	void insert_node(BinTree & tree, const T& value);
+	bool find_node(BinTree tree, T value, unsigned& compares) const;
+	const BinTreeNode* sub_node(BinTree tree, int compares) const;
+	unsigned int node_count(BinTree tree) const;
 	unsigned int count;
 
 	BinTree root_;

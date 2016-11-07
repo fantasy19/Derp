@@ -27,8 +27,9 @@ BSTree<T>::BSTree(const BSTree& rhs) {
 template <typename T>
 BSTree<T>::~BSTree() {
 	clear();
-	if (!share)
+	if (!share) {
 		delete oa;
+	}
 }
 
 template <typename T>
@@ -55,7 +56,8 @@ BSTree<T>& BSTree<T>::operator=(const BSTree& rhs) {
 
 template <typename T>
 const typename BSTree<T>::BinTreeNode* BSTree<T>::operator[](int index) const {
-	return root_;
+	
+	return sub_node(root_, index);
 }
 
 template <typename T>
@@ -70,17 +72,17 @@ void BSTree<T>::remove(const T& value) {
 
 template <typename T>
 void BSTree<T>::clear(void) {
-	if (!root_)
-		return;
-
-	free_tree(root_);
+	if (root_) {
+		free_tree(root_);
+		root_ = 0;
+	}
+	
 }
 
 template <typename T>
 bool BSTree<T>::find(const T& value, unsigned &compares) const {
 
-	bool b = find_node(root_, value, compares);
-	return b;
+	return find_node(root_, value, compares);
 
 }
 
@@ -129,7 +131,7 @@ typename BSTree<T>::BinTree BSTree<T>::make_node(const T& value) {
 template <typename T>
 int BSTree<T>::tree_height(BinTree tree) const {
 	if (tree == 0)
-		return 0;
+		return -1;
 
 	if (tree_height(tree->left) > tree_height(tree->right))
 		return tree_height(tree->left) + 1;
@@ -140,16 +142,26 @@ int BSTree<T>::tree_height(BinTree tree) const {
 
 template <typename T>
 void BSTree<T>::free_node(BinTree node) {
-	--count;
-	node->BSTree<T>::BinTreeNode::~BinTreeNode();
+	if (node) {
+		--count;
+		//node->~BinTreeNode();
+		oa->Free(node);
+	}
 }
 
 template <typename T>
-void BSTree<T>::free_tree(BinTree node) {
+void BSTree<T>::free_tree(BinTree  node) {
 	if (node) {
-		free_node(node->left);
-		free_node(node->right);
+		free_tree(node->left);
+		free_tree(node->right);
+		
+		if (node->left)
+			node->left = 0;
+		if (node->right)
+			node->right= 0;
+		
 		free_node(node);
+		node = 0;
 	}
 }
 
@@ -161,7 +173,7 @@ void BSTree<T>::find_predecessor(BinTree tree, BinTree &predecessor) const {
 }
 
 template <typename T>
-void BSTree<T>::copy_tree(BinTree lhs, BinTree rhs) {
+void BSTree<T>::copy_tree(BinTree & lhs, BinTree rhs) {
 	if (rhs) {
 		lhs = make_node(rhs->data);
 		copy_tree(lhs->left, rhs->left);
@@ -203,7 +215,7 @@ void BSTree<T>::delete_node(BinTree & Tree, const T& value) {
 }
 
 template <typename T>
-void BSTree<T>::insert_node(BinTree tree, const T& value) {
+void BSTree<T>::insert_node(BinTree & tree, const T& value) {
 	if (tree == 0)
 		tree = make_node(value);
 
@@ -214,16 +226,47 @@ void BSTree<T>::insert_node(BinTree tree, const T& value) {
 }
 
 template <typename T>
-bool BSTree<T>::find_node(BinTree tree, const T& value, unsigned& compares) const{
-	if (!tree)
+bool BSTree<T>::find_node(BinTree tree, T value, unsigned& compares) const{
+	
+	++compares;
+
+	if (!tree) {
 		return false;
-	else if (tree->data == value) {
-			++compares;
-			return true;
+	}
+	else
+	if (tree->data == value) {
+		return true;
 	}
 	else if (value < root_->data)
-		return find_node(tree, value, ++compares);
+		return find_node(tree->left, value, compares);
 	else
-		return find_node(tree, value, ++compares);
+		return find_node(tree->right, value, compares);
+}
+
+template <typename T>
+const typename BSTree<T>::BinTreeNode* BSTree<T>::sub_node(BinTree tree, int compares) const {
+	if (tree) {
+
+		int LC = node_count(tree->left);
+
+		if (LC > compares)
+			sub_node(tree->left, compares);
+		else
+		if (LC < compares)
+			sub_node(tree->right, compares - LC - 1);
+		else
+			return tree;
+
+	}
+	else
+		return NULL;
+}
+
+template <typename T>
+unsigned int BSTree<T>::node_count(BinTree tree) const{
+	if (tree == NULL)
+		return 0;
+
+	return 1 + node_count(tree->left) + node_count(tree->right);
 }
 
