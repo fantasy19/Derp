@@ -13,7 +13,7 @@ AVLTree<T>::~AVLTree() {
 
 template <typename T>
 void AVLTree<T>::insert(const T& value) throw(BSTException) {
-	std::stack<BinTree> stack_;
+	std::stack<BinTree*> stack_;
 	insert_node(root_, value, stack_);
 
 }
@@ -27,7 +27,7 @@ template <typename T>
 bool AVLTree<T>::ImplementedBalanceFactor(void) { return false; }
 
 template <typename T>
-void AVLTree<T>::RotateLeft(BinTree node) {
+void AVLTree<T>::RotateLeft(BinTree & node) {
 
 		BinTree temp = node;
 		node = node->right;
@@ -43,7 +43,7 @@ void AVLTree<T>::RotateLeft(BinTree node) {
 }
 
 template <typename T>
-void AVLTree<T>::RotateRight(BinTree node) {
+void AVLTree<T>::RotateRight(BinTree & node) {
 
 		BinTree temp = node;
 		node = node->left;
@@ -59,17 +59,17 @@ void AVLTree<T>::RotateRight(BinTree node) {
 }
 
 template <typename T>
-void AVLTree<T>::insert_node(BinTree & node, T value, std::stack<BinTree> & nodes) {
+void AVLTree<T>::insert_node(BinTree & node, T value, std::stack<BinTree*> & nodes) {
 	if (node == 0) {
 		node = make_node(value);
 		BalanceAVLTree(nodes); // Balance it now
 	}
 	else if (value < node->data) {
-		nodes.push(node); // save visited node
+		nodes.push(&node); // save visited node
 		insert_node(node->left, value, nodes);
 	}
 	else if (value > node->data) {
-		nodes.push(node); // save visited node
+		nodes.push(&node); // save visited node
 		insert_node(node->right, value, nodes);
 	}
 	else
@@ -77,10 +77,12 @@ void AVLTree<T>::insert_node(BinTree & node, T value, std::stack<BinTree> & node
 }
 
 template <typename T>
-void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
+void AVLTree<T>::BalanceAVLTree(std::stack<BinTree*> & nodes) {
 	while (!nodes.empty()) {
-		BinTree & node = nodes.top();
+		BinTree * nodetop = nodes.top();
 		nodes.pop();
+
+		BinTree &node = *nodetop;
 
 		int RH = tree_height(node->right);
 		int LH = tree_height(node->left);
