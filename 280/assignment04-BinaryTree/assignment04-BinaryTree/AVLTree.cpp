@@ -28,22 +28,34 @@ bool AVLTree<T>::ImplementedBalanceFactor(void) { return false; }
 
 template <typename T>
 void AVLTree<T>::RotateLeft(BinTree node) {
-	if ( node->right) {
+
 		BinTree temp = node;
 		node = node->right;
 		temp->right = node->left;
 		node->left = temp;
-	}
+	
+		node->count = temp->count;
+
+		unsigned leftCount = (temp->left) ? temp->left->count : 0;
+		unsigned rightCount = (temp->right) ? temp->right->count : 0;
+
+		temp->count = leftCount + rightCount + 1;
 }
 
 template <typename T>
 void AVLTree<T>::RotateRight(BinTree node) {
-	if (node->left) {
+
 		BinTree temp = node;
 		node = node->left;
 		temp->left = node->right;
 		node->right = temp;
-	}
+		
+		node->count = temp->count;
+
+		unsigned leftCount = (temp->left) ? temp->left->count : 0;
+		unsigned rightCount = (temp->right) ? temp->right->count : 0;
+
+		temp->count = leftCount + rightCount + 1;
 }
 
 template <typename T>
@@ -60,7 +72,8 @@ void AVLTree<T>::insert_node(BinTree & node, T value, std::stack<BinTree> & node
 		nodes.push(node); // save visited node
 		insert_node(node->right, value, nodes);
 	}
-
+	else
+		std::cout << "Error, duplicate item" << std::endl;
 }
 
 template <typename T>
@@ -69,7 +82,10 @@ void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
 		BinTree node = nodes.top();
 		nodes.pop();
 
-		if (tree_height(node->right)>(tree_height(node->left) + 1)) {
+		int RH = tree_height(node->right);
+		int LH = tree_height(node->left);
+
+		if (RH > (LH + 1)) {
 			if (tree_height(node->right->left) > tree_height(node->right->right)) {
 				RotateRight(node->right);
 				RotateLeft(node);
@@ -79,11 +95,13 @@ void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
 				RotateLeft(node);
 				//Promote u
 		}
-		
-		if ((tree_height(node->right) + 1)<tree_height(node->left)) {
-			if (tree_height(node->left)>tree_height(node->right))
-				RotateLeft(node);
+		else
+		if ((RH + 1)< LH ) {
+			if (tree_height(node->left->left) > tree_height(node->left->right)) {
+				RotateRight(node);
+				node_count(get_root());
 				//Promote u
+			}
 			else {
 				RotateLeft(node->left);
 				RotateRight(node);
@@ -94,4 +112,12 @@ void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
 		// implement algorithm using functions that
 		// are already defined (Height, RotateLeft, RotateRight)
 	}
+}
+
+template <typename T>
+unsigned int AVLTree<T>::node_count(BinTree tree) const {
+	if (tree == NULL)
+		return 0;
+
+	return 1 + node_count(tree->left) + node_count(tree->right);
 }

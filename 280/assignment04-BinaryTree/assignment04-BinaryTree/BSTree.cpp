@@ -1,7 +1,13 @@
 template <typename T>
 BSTree<T>::BSTree(ObjectAllocator *OA, bool ShareOA) : oa(OA), share(ShareOA){
-	if (!oa && !share)
-		oa = new ObjectAllocator(sizeof(BinTreeNode), OAConfig());
+	if (!oa && !share) {
+		try {
+			oa = new ObjectAllocator(sizeof(BinTreeNode), OAConfig());
+		}
+		catch (const OAException &e) {
+			throw(BSTException(BSTException::E_NO_MEMORY, e.what()));
+		}
+	}
 }
 
 template <typename T>
