@@ -1,5 +1,7 @@
 template <typename T>
 BSTree<T>::BSTree(ObjectAllocator *OA, bool ShareOA) : oa(OA), share(ShareOA){
+	root_ = 0;
+	count = 0;
 	if (!oa && !share) {
 		try {
 			oa = new ObjectAllocator(sizeof(BinTreeNode), OAConfig());
@@ -15,6 +17,7 @@ BSTree<T>::BSTree(const BSTree& rhs) {
 
 	if (rhs.oa)
 	{
+		count = rhs.count;
 		oa = rhs.oa; // Use rhs' allocator
 		 // We don't own it (won't free it)
 		share = true;            // If a copy of 'this object' is made, share the allocator
@@ -42,6 +45,7 @@ template <typename T>
 BSTree<T>& BSTree<T>::operator=(const BSTree& rhs) {
 	if (rhs.oa)
 	{
+		count = rhs.count;
 		oa = rhs.oa; // Use rhs' allocator
 										   // We don't own it (won't free it)
 		share = true;            // If a copy of 'this object' is made, share the allocator
@@ -147,11 +151,10 @@ int BSTree<T>::tree_height(BinTree tree) const {
 
 template <typename T>
 void BSTree<T>::free_node(BinTree node) {
-	if (node) {
 		--count;
 		node->~BinTreeNode();
 		oa->Free(node);
-	}
+	
 }
 
 template <typename T>
@@ -180,6 +183,7 @@ void BSTree<T>::find_predecessor(BinTree tree, BinTree &predecessor) const {
 template <typename T>
 void BSTree<T>::copy_tree(BinTree & lhs, BinTree rhs) {
 	if (rhs) {
+
 		lhs = make_node(rhs->data);
 		lhs->count = rhs->count;
 		copy_tree(lhs->left, rhs->left);
@@ -193,11 +197,16 @@ template <typename T>
 void BSTree<T>::delete_node(BinTree & Tree, const T& value) {
 	if (Tree == 0)
 		return;
-	else if (value < Tree->data)
+	else if (value < Tree->data) {
+		--Tree->count;
 		delete_node(Tree->left, value);
-	else if (value > Tree->data)
+	}
+	else if (value > Tree->data) {
+		--Tree->count;
 		delete_node(Tree->right, value);
+	}
 	else {
+		--Tree->count;
 		if (!Tree->left) {
 			BinTree temp = Tree;
 			Tree = Tree->right;
@@ -222,23 +231,29 @@ void BSTree<T>::delete_node(BinTree & Tree, const T& value) {
 
 template <typename T>
 void BSTree<T>::insert_node(BinTree & tree, const T& value) {
-	if (tree == 0) {
-		tree = make_node(value);
-		++tree->count;
-	}
+	try {
+		if (tree == 0) {
+			tree = make_node(value);
+			++tree->count;
+		}
 
-	else if (value < tree->data) {
-		++tree->count;
-		insert_node(tree->left, value);
+		else if (value < tree->data) {
+			++tree->count;
+			insert_node(tree->left, value);
+		}
+		else if (value > tree->data) {
+			++tree->count;
+			insert_node(tree->right, value);
+		}
 	}
-	else if (value > tree->data) {
-		++tree->count;
-		insert_node(tree->right, value);
+	catch (const OAException &e)
+	{
+		throw(BSTException(BSTException::E_NO_MEMORY, e.what()));
 	}
 }
 
 template <typename T>
-bool BSTree<T>::find_node(BinTree tree, T value, unsigned& compares) const{
+bool BSTree<T>::find_node(BinTree tree,const T& value, unsigned& compares) const{
 	
 	++compares;
 
@@ -258,12 +273,12 @@ template <typename T>
 const typename BSTree<T>::BinTreeNode* BSTree<T>::sub_node(BinTree tree, int compares) const {
 	if (tree) {
 
-		int LC = node_count(tree->left);
+		unsigned int LC = node_count(tree->left);
 
-		if (LC > compares)
+		if (LC > static_cast<unsigned>(compares))
 			return sub_node(tree->left, compares);
 		else
-		if (LC < compares)
+		if (LC < static_cast<unsigned>(compares))
 			return sub_node(tree->right, compares - LC - 1);
 		else
 			return tree;

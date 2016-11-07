@@ -19,14 +19,17 @@ class AVLTree : public BSTree<T>
     
   private:
     // private stuff
-	  void RotateLeft(BinTree &node);
-	  void RotateRight(BinTree &node);
-	  void insert_node(BinTree & node, T value, std::stack<BinTree*> & nodes);
-	  void BalanceAVLTree(std::stack<BinTree*> & nodes);
-	  unsigned int node_count(BinTree& tree) const;
+	  void RotateLeft(typename BSTree<T>::BinTree &node);
+	  void RotateRight(typename BSTree<T>::BinTree &node);
+	  void insert_begin(typename BSTree<T>::BinTree &tree, const T& value);
+	  void insert_node(typename BSTree<T>::BinTree & node, T value, std::stack<typename BSTree<T>::BinTree*> & nodes);
+	  void BalanceAVLTree(std::stack<typename BSTree<T>::BinTree*> & nodes);
+	  unsigned int node_count(typename BSTree<T>::BinTree& tree) const;
+	  void remove_begin(typename BSTree<T>::BinTree &tree, const T& value);
+	  void remove_node(typename BSTree<T>::BinTree &tree, const T& value,
+		  std::stack<typename BSTree<T>::BinTree*>& nodes);
 	  ObjectAllocator * oa;
 	  bool share;
-	  BinTree root_;
 };
 
 #include "AVLTree.cpp"
