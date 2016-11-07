@@ -50,7 +50,6 @@ BSTree<T>& BSTree<T>::operator=(const BSTree& rhs) {
 	
 	copy_tree(root_, rhs.root_);
 
-	//insert?
 	return *this;
 }
 
@@ -144,7 +143,7 @@ template <typename T>
 void BSTree<T>::free_node(BinTree node) {
 	if (node) {
 		--count;
-		//node->~BinTreeNode();
+		node->~BinTreeNode();
 		oa->Free(node);
 	}
 }
@@ -234,9 +233,8 @@ bool BSTree<T>::find_node(BinTree tree, T value, unsigned& compares) const{
 		return false;
 	}
 	else
-	if (tree->data == value) {
+	if (tree->data == value) 
 		return true;
-	}
 	else if (value < root_->data)
 		return find_node(tree->left, value, compares);
 	else
@@ -250,10 +248,10 @@ const typename BSTree<T>::BinTreeNode* BSTree<T>::sub_node(BinTree tree, int com
 		int LC = node_count(tree->left);
 
 		if (LC > compares)
-			sub_node(tree->left, compares);
+			return sub_node(tree->left, compares);
 		else
 		if (LC < compares)
-			sub_node(tree->right, compares - LC - 1);
+			return sub_node(tree->right, compares - LC - 1);
 		else
 			return tree;
 
