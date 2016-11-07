@@ -28,18 +28,22 @@ bool AVLTree<T>::ImplementedBalanceFactor(void) { return false; }
 
 template <typename T>
 void AVLTree<T>::RotateLeft(BinTree node) {
-	BinTree temp = node;
-	node = node->left;
-	temp->right = node->left;
-	node->left = temp;
+	if ( node->right) {
+		BinTree temp = node;
+		node = node->right;
+		temp->right = node->left;
+		node->left = temp;
+	}
 }
 
 template <typename T>
 void AVLTree<T>::RotateRight(BinTree node) {
-	BinTree temp = node;
-	node = node->right;
-	temp->left = node->right;
-	node->right = temp;
+	if (node->left) {
+		BinTree temp = node;
+		node = node->left;
+		temp->left = node->right;
+		node->right = temp;
+	}
 }
 
 template <typename T>
@@ -67,22 +71,22 @@ void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
 
 		if (tree_height(node->right)>(tree_height(node->left) + 1)) {
 			if (tree_height(node->right->left) > tree_height(node->right->right)) {
-				RotateRight(node->right->left);
-				RotateLeft(node->right);
+				RotateRight(node->right);
+				RotateLeft(node);
 				//Promote v twice
 			}
 			else
-				RotateLeft(node->right);
+				RotateLeft(node);
 				//Promote u
 		}
 		
 		if ((tree_height(node->right) + 1)<tree_height(node->left)) {
 			if (tree_height(node->left)>tree_height(node->right))
-				RotateLeft(node->left);
+				RotateLeft(node);
 				//Promote u
 			else {
-				RotateLeft(node->left->right);
-				RotateRight(node->left);
+				RotateLeft(node->left);
+				RotateRight(node);
 				//Promote w twice
 			}
 		}
