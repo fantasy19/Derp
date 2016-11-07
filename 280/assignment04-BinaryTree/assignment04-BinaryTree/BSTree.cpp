@@ -181,6 +181,7 @@ template <typename T>
 void BSTree<T>::copy_tree(BinTree & lhs, BinTree rhs) {
 	if (rhs) {
 		lhs = make_node(rhs->data);
+		lhs->count = rhs->count;
 		copy_tree(lhs->left, rhs->left);
 		copy_tree(lhs->right, rhs->right);
 	}
@@ -221,13 +222,19 @@ void BSTree<T>::delete_node(BinTree & Tree, const T& value) {
 
 template <typename T>
 void BSTree<T>::insert_node(BinTree & tree, const T& value) {
-	if (tree == 0)
+	if (tree == 0) {
 		tree = make_node(value);
+		++tree->count;
+	}
 
-	else if (value < tree->data)
+	else if (value < tree->data) {
+		++tree->count;
 		insert_node(tree->left, value);
-	else if (value > tree->data)
+	}
+	else if (value > tree->data) {
+		++tree->count;
 		insert_node(tree->right, value);
+	}
 }
 
 template <typename T>

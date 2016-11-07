@@ -2,8 +2,8 @@
 
 template <typename T>
 AVLTree<T>::AVLTree(ObjectAllocator *OA, bool ShareOA) : oa(OA), share(ShareOA) {
-	if (!oa && !share)
-		oa = new ObjectAllocator(sizeof(AVLTree), OAConfig());
+	/*if (!oa && !share)
+		oa = new ObjectAllocator(sizeof(AVLTree), OAConfig());*/
 }
 
 template <typename T>
@@ -15,7 +15,7 @@ template <typename T>
 void AVLTree<T>::insert(const T& value) throw(BSTException) {
 	std::stack<BinTree*> stack_;
 	insert_node(root_, value, stack_);
-
+	node_count(root_);
 }
 
 template <typename T>
@@ -117,7 +117,7 @@ void AVLTree<T>::BalanceAVLTree(std::stack<BinTree*> & nodes) {
 }
 
 template <typename T>
-unsigned int AVLTree<T>::node_count(BinTree tree) const {
+unsigned int AVLTree<T>::node_count(BinTree & tree) const {
 	if (tree == NULL)
 		return 0;
 
