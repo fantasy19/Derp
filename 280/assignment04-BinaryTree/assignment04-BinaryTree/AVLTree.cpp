@@ -79,7 +79,7 @@ void AVLTree<T>::insert_node(BinTree & node, T value, std::stack<BinTree> & node
 template <typename T>
 void AVLTree<T>::BalanceAVLTree(std::stack<BinTree> & nodes) {
 	while (!nodes.empty()) {
-		BinTree node = nodes.top();
+		BinTree & node = nodes.top();
 		nodes.pop();
 
 		int RH = tree_height(node->right);
@@ -119,5 +119,7 @@ unsigned int AVLTree<T>::node_count(BinTree tree) const {
 	if (tree == NULL)
 		return 0;
 
-	return 1 + node_count(tree->left) + node_count(tree->right);
+	tree->count = 1 + node_count(tree->left) + node_count(tree->right);
+
+	return tree->count;
 }
