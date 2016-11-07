@@ -21,11 +21,11 @@ class AVLTree : public BSTree<T>
     // private stuff
 	  void RotateLeft(BinTree node);
 	  void RotateRight(BinTree node);
-	  void insert_node(BinTree node, T value, std::stack<BinTree> & nodes);
+	  void insert_node(BinTree & node, T value, std::stack<BinTree> & nodes);
 	  void BalanceAVLTree(std::stack<BinTree> & nodes);
-	  int height(BinTree node);
 	  ObjectAllocator * oa;
 	  bool share;
+	  BinTree root_;
 };
 
 #include "AVLTree.cpp"
