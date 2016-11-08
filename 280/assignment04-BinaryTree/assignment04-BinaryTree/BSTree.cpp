@@ -115,7 +115,7 @@ template <typename T>
 BSTree<T>& BSTree<T>::operator=(const BSTree& rhs) {
 
 	if (this != &rhs) {
-		if (rhs.oa) { // share object allocator if available
+		if (rhs.share) { // share object allocator if available
 			oa = rhs.oa;
 			share = true;
 		}
@@ -129,6 +129,7 @@ BSTree<T>& BSTree<T>::operator=(const BSTree& rhs) {
 			BinTree tmp = make_node(rhs.root()->data);
 			tmp->count = rhs.root()->count;
 			copy_tree(tmp, rhs.root());
+			clear();
 			root_ = tmp;;
 		}
 	}
