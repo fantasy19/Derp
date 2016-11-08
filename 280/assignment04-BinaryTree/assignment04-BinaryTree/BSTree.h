@@ -1,3 +1,16 @@
+/****************************************************************************/
+/*!
+\file   BSTree.h
+\author Ang Cheng Yong
+\par    email: a.chengyong\@digipen.edu
+\par    DigiPen login: a.chengyong
+\par    Course: CS280
+\par    Programming Assignment #2
+\date   8/11/2016
+\brief
+This file contains the driver functions needed for BST.
+*/
+/****************************************************************************/
 //---------------------------------------------------------------------------
 #ifndef BSTREE_H
 #define BSTREE_H
@@ -71,18 +84,20 @@ class BSTree
 	
     
   private:
-	void free_tree(BinTree root);
-	void copy_tree(BinTree &lhs, BinTree rhs);
+	void free_tree(BinTree & root);
+	void copy_tree(BinTree &lhs, BinTree rhs)throw(BSTException);
 	void delete_node(BinTree & Tree, const T& value);
-	void insert_node(BinTree & tree, const T& value);
-	bool find_node(BinTree tree, const T & value, unsigned& compares) const;
 	const BinTreeNode* sub_node(BinTree tree, int compares) const;
-	unsigned int node_count(BinTree tree) const;
-	unsigned int count;
+	void insert_node(BinTree & tree, const T& value) throw(BSTException);
+	bool find_node(BinTree tree, const T & value, unsigned& compares) const;
 
-	BinTree root_;
+	//unsigned int node_count(BinTree tree) const;
+	//unsigned int count;
+
+	
 	ObjectAllocator * oa;
 	bool share;
+	BinTree root_;
     // private stuff    
 };
 
