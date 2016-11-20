@@ -3,6 +3,9 @@
 #define ALGRAPH_H
 //---------------------------------------------------------------------------
 #include <vector>
+#include <algorithm>
+#include <limits>
+#include <queue> 
 
 struct DijkstraInfo
 {
@@ -30,7 +33,22 @@ class ALGraph
     ALIST GetAList(void) const;
         
   private:
-    
+
+	struct sortNodes {
+		bool operator()(std::pair<unsigned, DijkstraInfo*> const & ldr, 
+						std::pair<unsigned, DijkstraInfo*> const & rdr) {
+			if (ldr.second->cost != rdr.second->cost)
+				return ldr.second->cost > rdr.second->cost;
+			else
+				return ldr.first > rdr.first;
+		}
+	};
+
+	typedef std::priority_queue<std::pair<unsigned, DijkstraInfo*>,
+		std::vector<std::pair<unsigned, DijkstraInfo*>>, sortNodes> pq;
+
+	unsigned weight(unsigned source, unsigned dest) const;
+
     // An EXAMPLE of some other classes you may want to create and 
     // implement in ALGraph.cpp
     class GNode; 
@@ -46,6 +64,9 @@ class ALGraph
     };
     
     // Other private fields and methods
+	std::vector<DijkstraInfo> nodes;
+	ALIST vecVecAdjList;
+	
 };
 
 #endif

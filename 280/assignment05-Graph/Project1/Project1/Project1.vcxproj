@@ -110,6 +110,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\ALGraph.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ALGraph.cpp" />
+    <ClCompile Include="..\..\driver-sample.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

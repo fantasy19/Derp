@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -634,12 +636,12 @@ void TestBig(unsigned nodes, unsigned percentage)
 int main(void)
 {
   // ********** Adjaceny list tests ********** 
-  RunDijkstra = false;
-  TestAllLists();
+  RunDijkstra = true;
+ // TestAllLists();
 
   //// ********** Dijkstra tests ********** 
   //RunDijkstra = true;
-  //TestDijkstra0(1);
+  TestDijkstra0(1);
   //TestDijkstra1(1);
   //TestDijkstra4(1);
   //TestDijkstra4a(1);
