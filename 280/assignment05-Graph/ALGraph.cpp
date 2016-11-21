@@ -36,6 +36,17 @@ unsigned ALGraph::weight(unsigned source, unsigned dest) const {
 		[&](AdjacencyInfo const & ar) { return (ar.id == dest); })->weight;
 }
 
+void ALGraph::constructVertexs() const {
+	vecVertex.resize(vecVecAdjList.size());
+
+	for (unsigned i = 0; i < vecVecAdjList.size(); ++i) {
+		vecVertex[i].edges.resize(vecVecAdjList[i].size());
+		vecVertex[i].id = i;
+		for (unsigned j = 0; j < vecVecAdjList[i].size(); ++j)
+			vecVertex[i].edges[j].aiptr = &vecVecAdjList[i][j];
+	}
+}
+
 std::pair<unsigned, DijkstraInfo*> ALGraph::top(std::vector<std::pair<unsigned, DijkstraInfo*>> & vr) const {
 	std::sort(vr.begin(), vr.end(),
 		[&](std::pair<unsigned, DijkstraInfo*> & ldr, std::pair<unsigned, DijkstraInfo*> & rdr) {
@@ -50,7 +61,16 @@ std::pair<unsigned, DijkstraInfo*> ALGraph::top(std::vector<std::pair<unsigned, 
 
 std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned start_node) const {
 
+	constructVertexs();
+
+	std::vector<GNode> tmpVv;
 	std::vector<std::pair<unsigned, DijkstraInfo*>> diq;
+
+	for (auto & gv : vecVertex) 
+		gv.cost = std::numeric_limits<unsigned>::max();
+	
+	vecVertex[start_node - 1].cost = 0;
+	tmpVv.push_back(vecVertex[start_node - 1]);
 
 	*const_cast<unsigned *>(&nodes[start_node - 1].cost) = 0;
 	//const_cast<DijkstraInfo*>(&nodes[start_node - 1])->path.push_back(start_node);
@@ -69,20 +89,22 @@ std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned start_node) const {
 	
 	while (!diq.empty()) { 
 		std::pair<unsigned, DijkstraInfo*> u = top(diq);
+		
 		diq.erase(diq.begin());
 		//diq.pop();
+		//std::cout << "next path is " << u.first + 1  << std::endl;
 
-		unsigned i = 0;
 		for (auto & v : vecVecAdjList[u.first]) {
 			unsigned alt = u.second->cost + weight(u.first, v.id);
 			if (nodes[v.id - 1].cost > alt) {
-				i = v.id;
+
 				*const_cast<unsigned*>(&nodes[v.id - 1].cost) = alt;
 				diq.push_back(std::make_pair(v.id - 1, const_cast<DijkstraInfo *>(&nodes[v.id - 1])));
 			
 			}
 		
 		}
+		
 		//uvr.push_back(i);
 	}
 

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <limits>
 #include <queue> 
+#include <iostream>
 
 struct DijkstraInfo
 {
@@ -49,13 +50,26 @@ class ALGraph
 
 	unsigned weight(unsigned source, unsigned dest) const;
 	std::pair<unsigned, DijkstraInfo*> top(std::vector<std::pair<unsigned, DijkstraInfo*>> & vr) const;
-	
+	void constructVertexs() const;
 	// An EXAMPLE of some other classes you may want to create and 
     // implement in ALGraph.cpp
-	struct GNode {
-		unsigned src, dest, weight;
+	struct GEdge {
+		GEdge() :aiptr(0) {}
+		AdjacencyInfo * aiptr;
 	};
-    class GEdge;
+
+	struct GNode {
+		GNode() :prev(0), id(0), cost(0) {}
+		GNode * prev;
+		unsigned id;
+		unsigned cost;
+		std::vector<GEdge> edges;
+		unsigned weight(unsigned dest) {
+			return std::find_if(edges.begin(), edges.end(),
+				[&](GEdge & er) { return (er.aiptr->id == dest); })->aiptr->weight;
+		}
+	};
+
     struct AdjInfo
     {
       GNode *node;
@@ -68,8 +82,8 @@ class ALGraph
     
     // Other private fields and methods
 	std::vector<DijkstraInfo> nodes;
-	ALIST vecVecAdjList;
-	
+	mutable ALIST vecVecAdjList;
+	mutable std::vector<GNode> vecVertex;
 };
 
 #endif
