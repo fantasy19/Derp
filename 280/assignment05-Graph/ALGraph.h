@@ -48,10 +48,13 @@ class ALGraph
 		std::vector<std::pair<unsigned, DijkstraInfo*>>, sortNodes> pq;
 
 	unsigned weight(unsigned source, unsigned dest) const;
-
-    // An EXAMPLE of some other classes you may want to create and 
+	std::pair<unsigned, DijkstraInfo*> top(std::vector<std::pair<unsigned, DijkstraInfo*>> & vr) const;
+	
+	// An EXAMPLE of some other classes you may want to create and 
     // implement in ALGraph.cpp
-    class GNode; 
+	struct GNode {
+		unsigned src, dest, weight;
+	};
     class GEdge;
     struct AdjInfo
     {

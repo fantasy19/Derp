@@ -14,16 +14,16 @@ void ALGraph::AddDEdge(unsigned source, unsigned destination, unsigned weight) {
 
 	ai.id = destination;
 	ai.weight = weight;
+
 	vecVecAdjList[source - 1].push_back(ai);
-	nodes[source - 1].path.push_back(destination);
 
 	std::sort(vecVecAdjList[source - 1].begin(), vecVecAdjList[source - 1].end(),
 		[](AdjacencyInfo & lar, AdjacencyInfo & rar) {
-		return lar.weight < rar.weight;
+		if (lar.weight != rar.weight)
+			return lar.weight < rar.weight;
+		else
+			return lar.id < rar.id;
 	});
-
-	std::sort(nodes[source - 1].path.begin(), nodes[source - 1].path.end());
-
 }
 
 void ALGraph::AddUEdge(unsigned node1, unsigned node2, unsigned weight){
@@ -32,15 +32,28 @@ void ALGraph::AddUEdge(unsigned node1, unsigned node2, unsigned weight){
 }
 
 unsigned ALGraph::weight(unsigned source, unsigned dest) const {
-	return std::find_if(vecVecAdjList[source].begin(), vecVecAdjList[source ].end(),
+	return std::find_if(vecVecAdjList[source].begin(), vecVecAdjList[source].end(),
 		[&](AdjacencyInfo const & ar) { return (ar.id == dest); })->weight;
+}
+
+std::pair<unsigned, DijkstraInfo*> ALGraph::top(std::vector<std::pair<unsigned, DijkstraInfo*>> & vr) const {
+	std::sort(vr.begin(), vr.end(),
+		[&](std::pair<unsigned, DijkstraInfo*> & ldr, std::pair<unsigned, DijkstraInfo*> & rdr) {
+		if (ldr.second->cost != rdr.second->cost)
+			return ldr.second->cost < rdr.second->cost;
+		else
+			return ldr.first < rdr.first;
+	});
+
+	return *vr.begin();
 }
 
 std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned start_node) const {
 
-	pq diq;
+	std::vector<std::pair<unsigned, DijkstraInfo*>> diq;
 
 	*const_cast<unsigned *>(&nodes[start_node - 1].cost) = 0;
+	//const_cast<DijkstraInfo*>(&nodes[start_node - 1])->path.push_back(start_node);
 	unsigned i = 0;
 
 	for (auto & dir : nodes) {
@@ -49,21 +62,28 @@ std::vector<DijkstraInfo> ALGraph::Dijkstra(unsigned start_node) const {
 			*const_cast<unsigned *>(&dir.cost) =
 				std::numeric_limits<unsigned>::max();
 		else
-			diq.push(std::make_pair(i, const_cast<DijkstraInfo *>(&dir)));
+			diq.push_back(std::make_pair(i, const_cast<DijkstraInfo *>(&dir)));
 
 		++i;
 	}
 	
 	while (!diq.empty()) { 
-		std::pair<unsigned, DijkstraInfo*> u = diq.top();
-		diq.pop();
-		for (auto & v : u.second->path) {
-			unsigned alt = u.second->cost + weight(u.first, v);
-			if (nodes[v-1].cost > alt) {
-				*const_cast<unsigned*>(&nodes[v - 1].cost) = alt;
-				diq.push(std::make_pair(v - 1, const_cast<DijkstraInfo *>(&nodes[v - 1]) ));
+		std::pair<unsigned, DijkstraInfo*> u = top(diq);
+		diq.erase(diq.begin());
+		//diq.pop();
+
+		unsigned i = 0;
+		for (auto & v : vecVecAdjList[u.first]) {
+			unsigned alt = u.second->cost + weight(u.first, v.id);
+			if (nodes[v.id - 1].cost > alt) {
+				i = v.id;
+				*const_cast<unsigned*>(&nodes[v.id - 1].cost) = alt;
+				diq.push_back(std::make_pair(v.id - 1, const_cast<DijkstraInfo *>(&nodes[v.id - 1])));
+			
 			}
+		
 		}
+		//uvr.push_back(i);
 	}
 
 	return nodes;
