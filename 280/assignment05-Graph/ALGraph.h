@@ -2,11 +2,25 @@
 #ifndef ALGRAPH_H
 #define ALGRAPH_H
 //---------------------------------------------------------------------------
+
+/****************************************************************************/
+/*!
+\file   ALGraph.h
+\author Ang Cheng Yong
+\par    email: a.chengyong\@digipen.edu
+\par    DigiPen login: a.chengyong
+\par    Course: CS280
+\par    Programming Assignment #5
+\date   22/11/2016
+\brief
+This file contains the driver functions needed for adjacency list and dijkstra.
+*/
+/****************************************************************************/
+
 #include <vector>
 #include <algorithm>
 #include <limits>
 #include <queue> 
-#include <iostream>
 
 struct DijkstraInfo
 {
@@ -34,54 +48,25 @@ class ALGraph
     ALIST GetAList(void) const;
         
   private:
-
-	struct sortNodes {
-		bool operator()(std::pair<unsigned, DijkstraInfo*> const & ldr, 
-						std::pair<unsigned, DijkstraInfo*> const & rdr) {
-			if (ldr.second->cost != rdr.second->cost)
-				return ldr.second->cost > rdr.second->cost;
-			else
-				return ldr.first > rdr.first;
-		}
-	};
-
-	typedef std::priority_queue<std::pair<unsigned, DijkstraInfo*>,
-		std::vector<std::pair<unsigned, DijkstraInfo*>>, sortNodes> pq;
-
-	unsigned weight(unsigned source, unsigned dest) const;
-	std::pair<unsigned, DijkstraInfo*> top(std::vector<std::pair<unsigned, DijkstraInfo*>> & vr) const;
-	void constructVertexs() const;
-	// An EXAMPLE of some other classes you may want to create and 
-    // implement in ALGraph.cpp
 	struct GEdge {
-		GEdge() :aiptr(0) {}
+		GEdge();
 		AdjacencyInfo * aiptr;
 	};
 
 	struct GNode {
-		GNode() :prev(0), id(0), cost(0) {}
-		GNode * prev;
+		GNode();
 		unsigned id;
-		unsigned cost;
+		DijkstraInfo * di;
 		std::vector<GEdge> edges;
-		unsigned weight(unsigned dest) {
-			return std::find_if(edges.begin(), edges.end(),
-				[&](GEdge & er) { return (er.aiptr->id == dest); })->aiptr->weight;
-		}
 	};
 
-    struct AdjInfo
-    {
-      GNode *node;
-      unsigned weight;
-      unsigned cost;
-      AdjInfo();
-      bool operator<(const AdjInfo& rhs) const;
-      bool operator>(const AdjInfo& rhs) const;
-    };
-    
-    // Other private fields and methods
-	std::vector<DijkstraInfo> nodes;
+	void constructVertexs() const;
+	unsigned weight(GNode & source, unsigned dest) const;
+	GNode top(std::vector<GNode> & vr) const;
+	bool visited(GNode & gr) const;
+
+	mutable std::vector<DijkstraInfo> nodes;
+	mutable std::vector<GNode> visitedNodes;
 	mutable ALIST vecVecAdjList;
 	mutable std::vector<GNode> vecVertex;
 };

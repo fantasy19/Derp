@@ -637,11 +637,11 @@ int main(void)
 {
   // ********** Adjaceny list tests ********** 
   RunDijkstra = true;
- // TestAllLists();
+  //TestAllLists();
 
   //// ********** Dijkstra tests ********** 
   //RunDijkstra = true;
-  TestDijkstra0(1);
+  //TestDijkstra0(1);
   //TestDijkstra1(1);
   //TestDijkstra4(1);
   //TestDijkstra4a(1);
@@ -654,7 +654,7 @@ int main(void)
   //// ********** Stress tests ********** 
   //TestBig(10, 100);
   //TestBig(30, 10);
-  //TestBig(99, 2);
+  TestBig(99, 2);
 
   //TestStress(1);
 
