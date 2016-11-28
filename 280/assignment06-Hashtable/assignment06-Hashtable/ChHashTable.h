@@ -123,6 +123,12 @@ class ChHashTable
   private:
 
      // Private fields and methods...
+
+	  ObjectAllocator* oa;
+	  HTConfig htc;
+	  mutable HTStats hts;
+	  mutable ChHTHeadNode* head;
+	  double loadFactor;
 };
 
 #include "ChHashTable.cpp"
