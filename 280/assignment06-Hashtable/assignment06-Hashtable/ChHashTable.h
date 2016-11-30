@@ -11,6 +11,7 @@
 #include "ObjectAllocator.h"
 #include "support.h"
 #include <cstring>
+#include <cmath>
 
 // client-provided hash function: takes a key and table size,
 // returns an index in the table.
@@ -127,6 +128,7 @@ class ChHashTable
 	  ChHTNode* CreateNode(const char *Key, const T& Data) throw(HashTableException);
 	  void GrowTable() throw(HashTableException);
 	  bool IsSameNode(const char* Key, const unsigned& key);
+	  void DeleteNode(ChHTNode* deletePtr);
 
 	  ObjectAllocator* oa;
 	  HTConfig htc;

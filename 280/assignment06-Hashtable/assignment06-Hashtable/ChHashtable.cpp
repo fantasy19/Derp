@@ -1,13 +1,7 @@
-#include "ChHashTable.h"
 
 template<typename T>
-ChHashTable<T>::ChHashTable(const HTConfig& Config,
-	ObjectAllocator* allocator)
-	: oa(0),
-	htc(Config),
-	hts(),
-	head(0),
-	loadFactor(0){
+ChHashTable<T>::ChHashTable(const HTConfig& Config, ObjectAllocator* allocator) : 
+	oa(0), htc(Config), hts(), head(0), loadFactor(0){
 
 	hts.TableSize_ = htc.InitialTableSize_;
 	hts.HashFunc_ = htc.HashFunc_;
@@ -74,7 +68,7 @@ throw(HashTableException){
 		if (!oa)
 			newNode = new ChHTNode(Data);
 		else{
-			newNode = (ChHTNode*)m_OA->Allocate();
+			newNode = (ChHTNode*)oa->Allocate();
 			newNode->Data = Data;
 		}
 
@@ -90,12 +84,13 @@ throw(HashTableException){
 
 template<typename T>
 void ChHashTable<T>::GrowTable() throw(HashTableException){
+
 	double factor = std::ceil(hts.TableSize_ * htc.GrowthFactor_);
 	unsigned cpts = GetClosestPrime(static_cast<unsigned>(factor));
 
 	try{
 		HTConfig newHtc = htc;
-		NewConfig.InitialTableSize_ = cpts;
+		newHtc.InitialTableSize_ = cpts;
 
 		ChHashTable<T> NewHT(newHtc, oa);
 
@@ -112,10 +107,10 @@ void ChHashTable<T>::GrowTable() throw(HashTableException){
 		clear();
 
 		++hts.Expansions_;
-		std::swap(head, NewHT.m_headnode);
-		std::swap(hts, NewHT.m_stats);
+		std::swap(head, NewHT.head);
+		std::swap(hts, NewHT.hts);
 		hts.Probes_ += NewHT.hts.Probes_;
-		hts.Expansions_ += NewHT.m_stats.Expansions_;
+		hts.Expansions_ += NewHT.hts.Expansions_;
 	}
 	catch (const OAException& e){
 		throw HashTableException(e.code(), e.what());
@@ -132,17 +127,17 @@ void ChHashTable<T>::clear(void){
 			ChHTNode* nextNode = iterNode->Next;
 
 			if (oa)
-				m_OA->Free(iterNode);
+				oa->Free(iterNode);
 			else
 				delete iterNode;
 
 			iterNode = nextNode;
 		}
 
-		m_headnode[i].Nodes = 0;
+		head[i].Nodes = 0;
 	}
 
-	m_stats.Count_ = 0;
+	hts.Count_ = 0;
 }
 
 template<typename T>
@@ -161,4 +156,75 @@ bool ChHashTable<T>::IsSameNode(const char* Key, const unsigned& index)
 	}
 
 	return false;
+}
+
+template<typename T>
+void ChHashTable<T>::remove(const char *Key) throw(HashTableException){
+	unsigned i = hts.HashFunc_(Key, hts.TableSize_);
+
+	ChHTNode* iterNode = head[i].Nodes, *prevNode = head[i].Nodes;
+	while (iterNode) {
+		++hts.Probes_;
+		if (!std::strcmp(iterNode->Key, Key)) {
+			if (iterNode && prevNode == iterNode) {
+				head[i].Nodes = iterNode->Next;
+				DeleteNode(iterNode);
+			}
+			else {
+				if (iterNode && prevNode){
+					prevNode->Next = iterNode->Next;
+					DeleteNode(iterNode);
+				}
+			}
+			return;
+		}
+
+		prevNode = iterNode;
+		iterNode = iterNode->Next;
+	}
+}
+
+template<typename T>
+const T& ChHashTable<T>::find(const char *Key) const throw(HashTableException)
+{
+	unsigned i = hts.HashFunc_(Key, hts.TableSize_);
+	ChHTNode* iterNode = head[i].Nodes;
+
+	while (iterNode)
+	{
+		++hts.Probes_;
+
+		if (!std::strcmp(iterNode->Key, Key))
+			return iterNode->Data;
+		
+		iterNode = iterNode->Next;
+	}
+
+	throw HashTableException(HashTableException::E_ITEM_NOT_FOUND,
+		"Item Not Found");
+}
+
+template<typename T>
+const typename ChHashTable<T>::ChHTHeadNode * ChHashTable<T>::GetTable(void) const
+{
+	return head;
+}
+
+template<typename T>
+HTStats ChHashTable<T>::GetStats(void) const
+{
+	return hts;
+}
+
+template<typename T>
+void ChHashTable<T>::DeleteNode(ChHTNode* deletePtr) {
+	if (htc.FreeProc_)
+		htc.FreeProc_(deletePtr->Data);
+
+	if (oa)
+		oa->Free(deletePtr);
+	else
+		delete deletePtr;
+	
+	--hts.Count_;
 }

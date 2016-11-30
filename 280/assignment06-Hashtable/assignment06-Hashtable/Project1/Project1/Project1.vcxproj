@@ -111,10 +111,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ChHashTable.h" />
+    <ClInclude Include="..\..\ObjectAllocator.h" />
+    <ClInclude Include="..\..\support.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ChHashtable.cpp" />
     <ClCompile Include="..\..\driver-sample.cpp" />
+    <ClCompile Include="..\..\ObjectAllocator.cpp" />
+    <ClCompile Include="..\..\support.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
