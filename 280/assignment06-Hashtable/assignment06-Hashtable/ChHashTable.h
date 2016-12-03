@@ -125,15 +125,15 @@ class ChHashTable
   private:
 
      // Private fields and methods...
-	  ChHTNode* CreateNode(const char *Key, const T& Data) throw(HashTableException);
-	  void GrowTable() throw(HashTableException);
-	  bool IsSameNode(const char* Key, const unsigned& key);
+	  ChHTNode* MakeNode(const char *Key, const T& Data) throw(HashTableException);
+	  void Grow() throw(HashTableException);
+	  void RemoveNode(ChHTNode* deletePtr);
 	  void DeleteNode(ChHTNode* deletePtr);
 
-	  ObjectAllocator* oa;
-	  HTConfig htc;
 	  mutable HTStats hts;
 	  mutable ChHTHeadNode* head;
+	  HTConfig htc;
+	  ObjectAllocator* oa;
 	  double loadFactor;
 };
 

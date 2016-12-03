@@ -115,6 +115,9 @@
     <ClInclude Include="..\..\support.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\ChHashtable.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\driver-sample.cpp" />
     <ClCompile Include="..\..\ObjectAllocator.cpp" />
     <ClCompile Include="..\..\support.cpp" />
