@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#define _CRTDBG_MAP_ALLOC  
+#include <stdlib.h>  
+
+
 #include "ChHashTable.h"
 
 using std::cout;
@@ -818,6 +822,7 @@ void Test8(HashData *phd)
 
 int main(int argc, char **argv)
 {
+
   FillPersonRecs();
 
   //enum HASHFUNCS {NONE, CONSTANT, REFLEXIVE, SIMPLE, RS, UNIVERSAL, PJW}; 
@@ -875,4 +880,5 @@ int main(int argc, char **argv)
 
   FreePersonRecs();
   return 0;
+
 }

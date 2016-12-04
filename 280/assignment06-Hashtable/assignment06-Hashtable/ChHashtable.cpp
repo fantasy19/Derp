@@ -30,7 +30,7 @@ none
 /***************************************************************************/
 template<typename T>
 ChHashTable<T>::ChHashTable(const HTConfig& Config, ObjectAllocator* allocator) : 
-	oa(0), htc(Config), hts(), head(0), loadFactor(0){
+	hts(), head(0), htc(Config), oa(0), loadFactor(0){
 
 	hts.TableSize_ = htc.InitialTableSize_;
 	hts.HashFunc_ = htc.HashFunc_;
@@ -230,17 +230,17 @@ template<typename T>
 void ChHashTable<T>::clear(void){
 
 	for (unsigned i = 0; i < hts.TableSize_; ++i){
-		ChHTNode* iterNode = head[i].Nodes;
+		ChHTNode* currNode = head[i].Nodes;
 
-		while (iterNode){
-			ChHTNode* nextNode = iterNode->Next;
+		while (currNode){
+			ChHTNode* nextNode = currNode->Next;
 
 			if (oa)
-				oa->Free(iterNode);
+				oa->Free(currNode);
 			else
-				delete iterNode;
+				delete currNode;
 
-			iterNode = nextNode;
+			currNode = nextNode;
 		}
 
 		head[i].Nodes = 0;
@@ -286,8 +286,8 @@ void ChHashTable<T>::remove(const char *Key) throw(HashTableException){
 			return;
 		}
 
-		prevNode = iterNode;
-		iterNode = iterNode->Next;
+		prevNode = currNode;
+		currNode = currNode->Next;
 	}
 }
 

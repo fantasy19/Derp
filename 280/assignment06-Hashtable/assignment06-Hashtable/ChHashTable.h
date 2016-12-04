@@ -126,9 +126,9 @@ class ChHashTable
 
      // Private fields and methods...
 	  ChHTNode* MakeNode(const char *Key, const T& Data) throw(HashTableException);
-	  void Grow() throw(HashTableException);
 	  void RemoveNode(ChHTNode* deletePtr);
-	  void DeleteNode(ChHTNode* deletePtr);
+	  void Grow() throw(HashTableException);
+	  
 
 	  mutable HTStats hts;
 	  mutable ChHTHeadNode* head;
